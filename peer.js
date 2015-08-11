@@ -1,12 +1,19 @@
 var SimplePeer = require('simple-peer')
 
 var peeps = []
-
-module.exports = {
-  handleDrop : handleDrop,
-  initiate: initiate,
-  answer: answer 
+var media
+module.exports = function(){
+  return {
+    handleDrop : handleDrop,
+    initiate: initiate,
+    answer: answer,
+    addMedia: addMedia
+  }
 } 
+
+function addMedia(p){
+  media = p
+}
 
 function handleDrop(file){
   try{
@@ -85,13 +92,24 @@ function answer(call, cb){
 
 function macFriend(init, cb){
 
-  var peer = new SimplePeer({initiator: init, trickle: false})
-  
+  var peer = new SimplePeer({initiator: init, trickle: false, stream: media})
+ 
+  var vid_el= undefined
+
   peer.on('error', function(e){
    console.log(e)
    cb(e)
   })
  
+  peer.on('stream', function(stream){
+    var vid = document.createElement('video')
+    vid.style.width = '640px'
+    vid.style.height = '480px'
+    vid.src = window.URL.createObjectURL(stream)
+    document.body.appendChild(vid)
+    vid.play()
+    vid_el = vid
+  })
 
   peer.on('data', function(data){
     console.log(data.toString())
@@ -105,7 +123,13 @@ function macFriend(init, cb){
   peer.on('signal', function(data){
     peeps.push(peer)
   })
+
+  peer.on('close', function(){
+    if(vid_el) document.body.removeChild(vid_el)
+  })
   
   return peer
 
 }
+
+
