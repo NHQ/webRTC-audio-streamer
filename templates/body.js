@@ -11,15 +11,14 @@ return html`
     <h2 class="monograph ul">
       Podcast live-streaming, recording, and <br />real-time talk with listener call-in.
     </h2>
-    <a href=/host class=demo>Try the Demo</a>
+    <a href=/ class=demo>Demo Coming Soon</a>
     <div class="features flexCol colCenter">
       <h3>
-        Test & Features and Ideas
+        Features and Ideas
       </h3>
       <ul class="flexCol">
         <li>Live-Stream and Record Audio Podcasts</li>
         <li>Host Listener Call-Ins, Talk Shows, Presentations</li>
-        <li>Chat and text</li>
         <li>Accept payments and Donations</li>
         <li>Charge for Subscriptions, Membership, or Call-ins</li>
         <li>Public or Private Streams</li>
