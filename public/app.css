@@ -84,7 +84,7 @@ h1, h2, h3 {
   padding: 1rem;
   border-radius:4px;
   font-size: 24px;
-  height:30vh; 
+  min-height:20vh;
 }
 .features ul, features h3{
   flex-grow:2;
