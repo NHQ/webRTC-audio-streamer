@@ -30,7 +30,8 @@ app.use(function(state, update){
   })
 })
 
-app.route('/', state => {
+app.route('', state => {
+  console.log(state)
   app.emitter.emit('unload','')
   return index(state, app)
 })
