@@ -9,7 +9,7 @@ return html`
       Gabr
     </h1>
     <h2 class="monograph ul">
-      Podcast live-streaming, recording, and real-time talk with listener call-in.
+      Podcast live-streaming, recording, and <br />real-time talk with listener call-in.
     </h2>
     <a href=/host class=demo>Try the Demo</a>
     <div class="features flexCol colCenter">
