@@ -2,16 +2,17 @@ var me_vid = document.getElementById('me')
 var call = document.getElementById('call')
 var media 
 var peers = require('./peer')()
-
+var ui = require('getids')()
+var h = require('hyperscript')
+//var audio = new AudioContext
+//var mic = require('../jsynth-mic')(audio)
 
 // for audio/video webRTC
  //addMedia()
 
- call.addEventListener('click', e => {
-   addMedia()
- })
+addMedia()
 
-function addMedia(audio=true, video=true){
+function addMedia(id, audio=true, video=false){
   navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
   navigator.getUserMedia({video, audio}, function(mediaElement){
@@ -19,7 +20,6 @@ function addMedia(audio=true, video=true){
     media = mediaElement
     me_vid.srcObject = media// window.URL.createObjectURL(mediaElement) 
     me_vid.play()
-    peers.peers.forEach(e => e.addStream(media))
 
   }, function(err){
       console.log(err)
@@ -87,6 +87,8 @@ pipe.on('data', function(data){
 // this happens when a new entity joins
 other.on('data', function(id){
   console.log(id)
+  ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${id}`, {onclick: connect})))  
+  function connect(){
   id = id.toString()
   if(!(id === me.id)) {
 
@@ -101,6 +103,7 @@ other.on('data', function(id){
       var offer = {from: me.id}
       offer.offer = o
       hub.broadcast(id, JSON.stringify(offer))
+      peers.peers.forEach(e => {if(e.id == id) e.addStream(media)})
     })
-  }
+  }}
 })

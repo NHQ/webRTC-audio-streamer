@@ -7,7 +7,8 @@ module.exports = function(){
     handleDrop : handleDrop,
     initiate: initiate,
     answer: answer,
-    addMedia: addMedia
+    addMedia: addMedia,
+    peers: peeps
   }
 } 
 
@@ -105,14 +106,14 @@ function macFriend(init, cb){
     var vid = document.createElement('video')
     vid.style.width = '640px'
     vid.style.height = '480px'
-    vid.src = window.URL.createObjectURL(stream)
+    vid.srcObject = stream//indow.URL.createObjectURL(stream)
     document.body.appendChild(vid)
     vid.play()
     vid_el = vid
   })
 
   peer.on('data', function(data){
-    console.log(data.toString())
+//    console.log(data.toString())
   })
 
   peer.on('connect', function(){
@@ -121,13 +122,13 @@ function macFriend(init, cb){
   })
 
   peer.on('signal', function(data){
-    peeps.push(peer)
   })
 
   peer.on('close', function(){
     if(vid_el) document.body.removeChild(vid_el)
   })
   
+  peeps.push(peer)
   return peer
 
 }
