@@ -14,7 +14,7 @@ return html`
     <a href=/host class=demo>Try the Demo</a>
     <div class="features flexCol colCenter">
       <h3>
-        Test Features and Ideas
+        Test & Features and Ideas
       </h3>
       <ul>
         <li>Live-Stream and Record Audio Podcasts</li>
