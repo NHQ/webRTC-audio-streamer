@@ -75,11 +75,7 @@ h1, h2, h3 {
 
 @media (max-width: 520px){
   .display{
-    height: 100%;
-    width:100%;
-    background: #f5f5f5;
-    padding: 3vh;
-    padding-bottom:0;
+    padding: 0;
   }
 }
 
