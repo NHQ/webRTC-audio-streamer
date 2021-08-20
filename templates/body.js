@@ -16,7 +16,7 @@ return html`
       <h3>
         Test & Features and Ideas
       </h3>
-      <ul>
+      <ul class="flexCol">
         <li>Live-Stream and Record Audio Podcasts</li>
         <li>Host Listener Call-Ins, Talk Shows, Presentations</li>
         <li>Chat and text</li>
