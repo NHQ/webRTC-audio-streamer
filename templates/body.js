@@ -14,7 +14,7 @@ return html`
     <a href=/host class=demo>Try the Demo</a>
     <div class="features flexCol colCenter">
       <h3>
-        Features and Ideas
+        Test Features and Ideas
       </h3>
       <ul>
         <li>Live-Stream and Record Audio Podcasts</li>
@@ -28,6 +28,7 @@ return html`
         <li>¿Asyncronous Audio Conversations?</li>
         <li>¿Call & Response Convos?</li>
         <li>Call 1-900-555-1337 $4.99 for the 1st minute...</li>
+
       </ul>
     </div>
     <img src=GabrielHorn.png class=logo />
