@@ -1,109 +1,120 @@
 var me_vid = document.getElementById('me')
 var call = document.getElementById('call')
 var media 
-var peers = require('./peer')()
+var Peer = require('simple-peer')
 var ui = require('getids')()
 var h = require('hyperscript')
-//var audio = new AudioContext
-//var mic = require('../jsynth-mic')(audio)
-
-// for audio/video webRTC
- //addMedia()
-
-addMedia()
-
-function addMedia(id, audio=true, video=false){
-  navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
-
-  navigator.getUserMedia({video, audio}, function(mediaElement){
-    
-    media = mediaElement
-    me_vid.srcObject = media// window.URL.createObjectURL(mediaElement) 
-    me_vid.play()
-
-  }, function(err){
-      console.log(err)
-  })
-}
-
+var signalhub = require('signalhub')
+const short = require('short-uuid');
+const msrc = require('mediasource')
+const toa = require('to-arraybuffer')
+const btob = require('blob-to-buffer')
+var master = new AudioContext
+var mic = require('../jsynth-mic/stream')
+var peers = {}
 var minimist = require('minimist')
 var argv = minimist(process.argv, {
   default: {
-    host: '10.42.0.200',
+    host: '0.0.0.0',
     port: 8009,
-    protocol: 'http:'
+    protocol: 'http'
   }
 })
 
 //console.log(argv)
 
-var me = {id: Math.random().toString().slice(2)}
+var phonebook = {}
 
-//var sockethub = require('signalplex')
-var signalhub = require('signalhub')
-var hub 
-  //hub = sockethub(argv.protocol + '//' + argv.host + ':' + argv.port, 'meow')
-
-hub = signalhub(argv.protocol + '//' + argv.host + ':' + argv.port, 'meow')
-var pipe = hub.subscribe(me.id)
-
-var other = hub.subscribe('others')
-var others = {}
-
-// entre vous
-hub.broadcast('others', me.id)
-pipe.on('error', function(e){console.log(e)})
-pipe.on('data', function(data){
-  console.log(data.toString())
-  //data = data.toString()
-  
-  data = JSON.parse(data.toString())
-  var from = others[data.from]
-  console.log(from, data)
-  if(!from){
-  
-    var call = data.offer
-    var opts = {}
-    opts.which ='digital'
-    opts.init = false
-    peers.answer(call, function(e, p, o){
-      others[data.from] = {peer: p}
-      p.on('close', function(){
-        others[data.from] = null
-      })
-      p.on('data', function(data){
-        
-      })
-      var reply = {from: me.id, offer: o}
-      console.log('reply', reply)
-      hub.broadcast(data.from, JSON.stringify(reply))
-    
-    })
-  }else{
-    from.peer.signal(data.offer)
-  }
+ui.demo.addEventListener('click', e => {
+  e.preventDefault()
+  addMedia()
 })
 
-// this happens when a new entity joins
-other.on('data', function(id){
-  console.log(id)
-  ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${id}`, {onclick: connect})))  
-  function connect(){
-  id = id.toString()
-  if(!(id === me.id)) {
+addMedia()
 
-    var opts = {}
-    opts.init = true
-    opts.which = 'digital' // else 'manual'
+function mute(torf){
+  micStream.getAudioTracks()[0].enabled = torf
+}
+
+function addMedia(id, audio=true, video=false){
+  navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+
+  navigator.getUserMedia({video, audio}, function(stream){
+    var me = {id: short().generate()}
+    ui.myid.innerText = me.id
+    var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
+    var pipe = hub.subscribe(me.id)
+    console.log(stream.getAudioTracks())
+    //var micnode = mic(master, stream)
+    var initr = false
+    ui.callem.onclick = e =>{
+      initr = true
+      hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+    } 
+    var recr = new MediaRecorder(stream, {mimeType: 'audio/webm'})
+  
+    var ael = document.getElementById('xxx')
+    var mime = 'audio/webm;codecs=opus'
+
+    pipe.on('error', function(e){console.log(e)})
+    pipe.on('data', function(data){
     
-    peers.initiate(opts, function(e, p, o){
-  //    console.log('peer init' + id + '\n', e,p,o)
-      others[id] = {init:true}
-      others[id].peer = p
-      var offer = {from: me.id}
-      offer.offer = o
-      hub.broadcast(id, JSON.stringify(offer))
-      peers.peers.forEach(e => {if(e.id == id) e.addStream(media)})
+      // this needs to go into call waiting...
+
+      //console.log(data.toString())
+      //data = data.toString()
+      
+      data = JSON.parse(data.toString())
+      
+      // callerID
+      var from = data.callerId
+      //callers[from] = data // data.message, data.name
+      _connect(data)
+      //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+      
+      
+
+      function _connect(data){
+        console.log(data)
+        if(phonebook[data.callerId]) phonebook[data.callerId].signal(data.signal)
+        else{
+          var caller = new Peer({initiator: data.signal ? false : true, trickle: false, objectMode: false})
+          phonebook[data.callerId] = caller
+          //caller.on('stream', stream => {})
+          if(data.signal) caller.signal(data.signal)
+          caller.on('signal', signal => {
+            console.log(signal)
+            hub.broadcast(data.callerId, JSON.stringify({signal: signal, callerId: me.id}))
+          }) 
+          caller.on('close', _ => {})
+          caller.on('connect', e => {
+            var src = new MediaSource()
+            ael.src = URL.createObjectURL( src )
+            src.onsourceopen = e => {
+              var srcBuf = src.addSourceBuffer(mime)
+              ael.play()
+              caller.on('data', e => {
+               // console.log(e)
+                srcBuf.appendBuffer(toa(e))
+              })
+            } 
+            recr.start(1000)
+            console.log(`Connected to ${data.callerId}`)
+
+            recr.addEventListener('dataavailable', e => {
+              //console.log(e)
+              btob(e.data, (err, buf) => caller.write(buf))
+              //setTimeout(function(){ recr.stop() }, 3000)
+            }) 
+          }) 
+        }
+      }
+      //console.log(from, data)
+
     })
-  }}
-})
+    
+
+  }, function(err){
+      console.log(err)
+  })
+}

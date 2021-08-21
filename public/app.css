@@ -22,7 +22,6 @@ h1, h2, h3 {
   width:100%;
   background: #f5f5f5;
 }
-
 .ul{
   text-decoration:none;
   font-family: Garamond;
@@ -101,3 +100,7 @@ h1, h2, h3 {
 .demo:visited{
   color: blue;
 }
+.hide{
+  display:none;
+}
+
