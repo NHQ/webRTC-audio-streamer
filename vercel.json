@@ -1,5 +1,4 @@
 {
   "redirects": [
-    { "source": "/:any", "destination": "/" }
   ]
 }
