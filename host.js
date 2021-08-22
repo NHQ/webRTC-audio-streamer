@@ -54,7 +54,7 @@ function addMedia(id, audio=true, video=false){
       initr = true
       hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
     } 
-    var recr = new MediaRecorder(stream, {mimeType: 'audio/webm'})
+    var recr = new MediaRecorder(stream, {mimeType: 'audio/webm', audioBitsPerSecond:40000})
   
     var ael = document.getElementById('xxx')
     var mime = 'audio/webm;codecs=opus'
