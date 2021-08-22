@@ -4,7 +4,6 @@ var choo = require('choo')
 var html = require('choo/html')
 
 var index = require('./templates/body.js')
-var bundle = require('./host')
 var app = choo()
 app.mount(document.getElementById('app'))
 // We can communicate with main process through messages.

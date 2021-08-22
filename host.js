@@ -20,6 +20,7 @@ var argv = minimist(process.argv, {
     protocol: 'http'
   }
 })
+var store = require('store')
 
 //console.log(argv)
 
@@ -29,7 +30,7 @@ ui.demo.addEventListener('click', e => {
   e.preventDefault()
   addMedia()
 })
-
+ui.callId.value = ui.callId.innerText = window.location.hash.slice(1)
 addMedia()
 
 function mute(torf){
@@ -40,7 +41,9 @@ function addMedia(id, audio=true, video=false){
   navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
   navigator.getUserMedia({video, audio}, function(stream){
-    var me = {id: short().generate()}
+    var me = store.get('myself')
+    if(!me) me = {id: short().generate()}
+    store.set('myself', me)
     ui.myid.innerText = me.id
     var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
     var pipe = hub.subscribe(me.id)
@@ -98,7 +101,7 @@ function addMedia(id, audio=true, video=false){
                 srcBuf.appendBuffer(toa(e))
               })
             } 
-            recr.start(50)
+            recr.start(20)
             console.log(`Connected to ${data.callerId}`)
 
             recr.addEventListener('dataavailable', e => {
