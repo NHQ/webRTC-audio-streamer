@@ -98,7 +98,7 @@ function addMedia(id, audio=true, video=false){
                 srcBuf.appendBuffer(toa(e))
               })
             } 
-            recr.start(100)
+            recr.start(50)
             console.log(`Connected to ${data.callerId}`)
 
             recr.addEventListener('dataavailable', e => {
