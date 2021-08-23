@@ -93,11 +93,11 @@ function addMedia(id, audio=true, video=false){
           caller.on('connect', e => {
             var sink = new msrc(ael).createWriteStream(mime)
             caller.pipe(sink)
+            ael.play()
             //var src = new MediaSource()
             //ael.src = URL.createObjectURL( src )
             /*src.onsourceopen = e => {
               var srcBuf = src.addSourceBuffer(mime)
-              ael.play()
               caller.on('data', e => {
                // console.log(e)
                 srcBuf.appendBuffer(toa(e))
