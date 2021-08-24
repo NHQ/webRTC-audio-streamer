@@ -42,7 +42,7 @@ function mute(torf){
 }
 
 function addMedia(id, audio=true, video=false){
-  navigator.getUserMedia = navigator.GetUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
   navigator.getUserMedia({video, audio}, function(stream){
     var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
