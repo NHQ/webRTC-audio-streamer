@@ -35,7 +35,7 @@ ui.demo.addEventListener('click', e => {
   e.preventDefault()
   addMedia()
 })
-//addMedia()
+addMedia()
 
 function mute(torf){
   micStream.getAudioTracks()[0].enabled = torf
@@ -47,7 +47,7 @@ function addMedia(id, audio=true, video=false){
   navigator.getUserMedia({video, audio}, function(stream){
     var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
     var pipe = hub.subscribe(me.id)
-    console.log(stream.getAudioTracks())
+    //console.log(stream.getAudioTracks())
     //var micnode = mic(master, stream)
     var initr = false
     ui.callem.onclick = e =>{
