@@ -52,6 +52,7 @@ pipe.on('data', function(data){
 })
 
 var session = qs.parse(window.location.search)
+console.log(session)
 if(session.call) hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
 
 var sink = new msrc(ael).createWriteStream(mime)
