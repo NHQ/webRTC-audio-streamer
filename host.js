@@ -43,8 +43,7 @@ var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
 var pipe = hub.subscribe(me.id)
 
 ui.callem.onclick = e =>{
-  initr = true
-  hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+  addMedia()
 } 
 
 function mute(torf){
@@ -68,6 +67,7 @@ function addMedia(id, audio=true, video=false){
       _connect(data, recr)
       //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
     })
+    hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
   }, function(err){
       console.log(err)
   })
