@@ -29,7 +29,7 @@ var store = require('store')
 
 //console.log(argv)
 
-var ael = ui.ael//document.getElementById('xxx')
+var ael = ui.player
 var mime = 'audio/webm;codecs=opus'
 var phonebook = {}
 ui.callId.value = ui.callId.innerText = window.location.hash.slice(1)
