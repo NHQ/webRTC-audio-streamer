@@ -51,7 +51,7 @@ pipe.on('data', function(data){
   //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
 })
 
-var session = qs.parse(window.location.search)
+var session = qs.parse(window.location.search.slice(1))
 console.log(session)
 if(session.call) hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
 
