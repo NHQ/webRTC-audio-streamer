@@ -21,17 +21,21 @@ var argv = minimist(process.argv, {
   }
 })
 var store = require('store')
+    var me = store.get('myself')
+    if(!me) me = {id: short().generate()}
+    store.set('myself', me)
+    ui.myid.innerText = me.id
 
 //console.log(argv)
 
 var phonebook = {}
+ui.callId.value = ui.callId.innerText = window.location.hash.slice(1)
 
 ui.demo.addEventListener('click', e => {
   e.preventDefault()
   addMedia()
 })
-ui.callId.value = ui.callId.innerText = window.location.hash.slice(1)
-addMedia()
+//addMedia()
 
 function mute(torf){
   micStream.getAudioTracks()[0].enabled = torf
@@ -41,10 +45,6 @@ function addMedia(id, audio=true, video=false){
   navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
   navigator.getUserMedia({video, audio}, function(stream){
-    var me = store.get('myself')
-    if(!me) me = {id: short().generate()}
-    store.set('myself', me)
-    ui.myid.innerText = me.id
     var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
     var pipe = hub.subscribe(me.id)
     console.log(stream.getAudioTracks())
