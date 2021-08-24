@@ -9,8 +9,8 @@ const short = require('short-uuid');
 const msrc = require('mediasource')
 const toa = require('to-arraybuffer')
 const btob = require('blob-to-buffer')
-var master = new AudioContext
-var mic = require('../jsynth-mic/stream')
+//var master = new AudioContext
+//var mic = require('../jsynth-mic/stream')
 var peers = {}
 var minimist = require('minimist')
 var argv = minimist(process.argv, {
@@ -42,7 +42,7 @@ function mute(torf){
 }
 
 function addMedia(id, audio=true, video=false){
-  navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+  navigator.getUserMedia = navigator.GetUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
   navigator.getUserMedia({video, audio}, function(stream){
     var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
