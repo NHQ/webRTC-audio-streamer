@@ -31,7 +31,7 @@ ui.demo.addEventListener('click', e => {
   addMedia()
 })
 ui.callId.value = ui.callId.innerText = window.location.hash.slice(1)
-addMedia()
+//addMedia()
 
 function mute(torf){
   micStream.getAudioTracks()[0].enabled = torf
