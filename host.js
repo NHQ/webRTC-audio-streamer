@@ -81,6 +81,7 @@ function addMedia(id, audio=true, video=false){
     })
 
     recr.start(20)
+    ael.play()
     
     
   }, function(err){
@@ -104,6 +105,9 @@ function _connect(data, recr){
     caller.on('connect', e => {
       caller.pipe(sink)
       ael.play()
+      caller.on('close', e => {
+        delete phonebook[data.callerId]
+      })
       //var src = new MediaSource()
       //ael.src = URL.createObjectURL( src )
       /*src.onsourceopen = e => {
