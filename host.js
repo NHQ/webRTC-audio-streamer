@@ -50,7 +50,9 @@ pipe.on('data', function(data){
   _connect(data, recr)
   //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
 })
-hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+
+var session = qs.parse(window.location.search)
+if(session.call) hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
 
 var sink = new msrc(ael).createWriteStream(mime)
 var recr 
