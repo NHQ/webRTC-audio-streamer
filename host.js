@@ -41,6 +41,19 @@ ui.demo.addEventListener('click', e => {
 //addMedia()
 var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
 var pipe = hub.subscribe(me.id)
+pipe.on('error', function(e){console.log(e)})
+pipe.on('data', function(data){
+  // this needs to go into call waiting...
+  data = JSON.parse(data.toString())
+  // callerID
+  var from = data.callerId
+  _connect(data, recr)
+  //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+})
+hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+
+var sink = new msrc(ael).createWriteStream(mime)
+var recr 
 
 ui.callem.onclick = e =>{
   addMedia()
@@ -56,18 +69,17 @@ function addMedia(id, audio=true, video=false){
   navigator.getUserMedia({video, audio}, function(stream){
     //console.log(stream.getAudioTracks())
     //var micnode = mic(master, stream)
-    var initr = false
-    var recr = new MediaRecorder(stream, {mimeType: 'audio/webm', audioBitsPerSecond:40000})
-    pipe.on('error', function(e){console.log(e)})
-    pipe.on('data', function(data){
-      // this needs to go into call waiting...
-      data = JSON.parse(data.toString())
-      // callerID
-      var from = data.callerId
-      _connect(data, recr)
-      //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+    recr = new MediaRecorder(stream, {mimeType: mime, audioBitsPerSecond:40000})
+    // do same for host monitoring:
+    recr.addEventListener('dataavailable', e => {
+      //console.log(e)
+      for(var smith in phonebook) btob(e.data, (err, buf) => phonebook[smith].write(buf))
+      //setTimeout(function(){ recr.stop() }, 3000)
     })
-    hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+
+    recr.start(20)
+    
+    
   }, function(err){
       console.log(err)
   })
@@ -87,7 +99,6 @@ function _connect(data, recr){
     }) 
     caller.on('close', _ => {})
     caller.on('connect', e => {
-      var sink = new msrc(ael).createWriteStream(mime)
       caller.pipe(sink)
       ael.play()
       //var src = new MediaSource()
@@ -99,14 +110,7 @@ function _connect(data, recr){
           srcBuf.appendBuffer(toa(e))
         })
       } */
-      recr.start(20)
       console.log(`Connected to ${data.callerId}`)
-
-      recr.addEventListener('dataavailable', e => {
-        //console.log(e)
-        btob(e.data, (err, buf) => caller.write(buf))
-        //setTimeout(function(){ recr.stop() }, 3000)
-      }) 
     }) 
   }
 }
