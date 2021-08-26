@@ -143,7 +143,7 @@ function _connect(data, recr){
       //ps(tops(caller), tops(sink))
       caller.pipe(sink)
       //ael.play()
-      caller.on('data', e => if(Math.random < .1) console.log(e))
+      caller.on('data', e => { if(Math.random < .1) console.log(e)} )
       caller.on('close', e => {
         delete phonebook[data.callerId]
       })
