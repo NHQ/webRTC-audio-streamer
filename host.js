@@ -105,7 +105,7 @@ function addMedia(id, audio=true, video=false){
  // ael.play()
     //for(var smith in phonebook) mediaStream.pipe(phonebook[smith]) 
     //btob(e.data, (err, buf) => phonebook[smith].write(buf))
-    ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
+    //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
      
     recr.addEventListener('dataavailable', e => {
       //console.log(e)
