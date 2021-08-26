@@ -63,7 +63,7 @@ pipe.on('data', function(data){
   console.log(data)
   // callerID
   var from = data.callerId
-  _connect(data, recr)
+  _connect(data, data.signal ? true : false)
   //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
 })
 
@@ -132,7 +132,7 @@ function _connect(data, init){
     var caller = new Peer({initiator: init, trickle: false, objectMode: false})
     caller._debug = console.log
     //caller.on('stream', stream => {})
-    if(data.signal) caller.signal(data.signal)
+    //if(data.signal) caller.signal(data.signal)
     caller.on('error',e=> console.log(e))
     caller.on('signal', signal => {
       console.log(signal)
