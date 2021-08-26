@@ -57,8 +57,7 @@ pipe.on('data', function(data){
   data = JSON.parse(data.toString())
   console.log(data)
   // callerID
-  var from = data.callerId
-  _connect(data, data.signal ? true : false)
+  initConnect(data.peerId, false, data.signal)
   //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
 })
 
@@ -73,7 +72,7 @@ var mediaStream
 
 ui.callem.onclick = e =>{
     if(ui.callId.value){
-      _connect({callerId: ui.callId.value}, true)
+      initConnect(ui.callId.value, true, null)
       //hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
     }
 } 
@@ -120,9 +119,31 @@ function addMedia(id, audio=true, video=false){
       console.log(err)
   })
 }
+
+var connecting = {}
+
+function initConnect(id, init, signal){
+  var caller = new Peer({initiator: init, trickle: false, objectMode: false})
+  connecting[id] = caller
+  caller._debug = console.log
+  caller.on('signal', sig => hub.broadcast(id, JSON.stringify({peerId: me.id, to: id, signal: sig})))
+  if(signal) caller.signal(signal)
+  caller.on('connect', e => {
+    phonebook[id] = caller
+    connecting[id] = null
+    console.log('connected to ' + id)
+  })
+}
+
+function replySignal(msg){
+  let peer = connecting[mes.peerId]
+  if(!peer) initConnect(msg.peerId, false, msg.signal) 
+}
+
+
 function _connect(data, init){
   console.log(data)
-  if(phonebook[data.callerId]) phonebook[data.callerId].signal(data.signal)
+  if(phonebook[data.from]) phonebook[data.from].signal(data.signal)
   else{
     var caller = new Peer({initiator: init, trickle: false, objectMode: false})
     caller._debug = console.log
@@ -131,8 +152,8 @@ function _connect(data, init){
     caller.on('error',e=> console.log(e))
     caller.on('signal', signal => {
       console.log(signal)
-      if (signal.renegotiate || signal.transceiverRequest) return
-      else hub.broadcast(data.callerId, JSON.stringify({signal: signal, callerId: me.id}))
+      //if (signal.renegotiate || signal.transceiverRequest) return
+      hub.broadcast(data.from, JSON.stringify({signal: signal, from: me.id}))
     }) 
     caller.on('close', _ => {})
     caller.on('connect', e => {
