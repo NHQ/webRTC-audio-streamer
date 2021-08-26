@@ -43,10 +43,13 @@
           <label for=callId><h3>Call an ID:</h3></label>
           <input type=text id=callId class=largeTextInput placeholder="enter ID" />
           <button id=callem class=largeButton>Call</button>
+          <button id=addMic class=largeButton>Add Mic</button>
           </div>
         </div>
         <img src=GabrielHorn.png class=logo />
-          <audio id=player controls />
+          <audio id=player controls ></audio>
+          <audio id=monitor controls ></audio>
+          <div id=peering></div>
       </div>
     </div>
     <script type="text/javascript" src="bundle.js"></script>

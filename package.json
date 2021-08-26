@@ -18,15 +18,21 @@
     "getids": "^0.2.0",
     "hyperscript": "^2.0.2",
     "level": "^0.18.0",
+    "media-recorder-stream": "^2.2.0",
     "mediasource": "^2.4.0",
     "memdb": "^0.2.0",
     "minimist": "^1.1.1",
+    "page-bus": "^3.0.1",
+    "pump": "^3.0.0",
     "secure-scuttlebutt": "^10.1.0",
+    "sheetify": "^8.0.0",
+    "sheetify-cssnext": "^3.0.0",
     "short-uuid": "^4.2.0",
     "signalhub": "^3.2.0",
     "signalplex": "^1.5.0",
     "simple-peer": "^9.11.0",
     "store": "^2.0.12",
-    "through2": "^0.6.5"
+    "through2": "^0.6.5",
+    "webm-cluster-stream": "^1.0.0"
   }
 }
