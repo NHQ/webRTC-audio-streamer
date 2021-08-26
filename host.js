@@ -124,7 +124,7 @@ function addMedia(id, audio=true, video=false){
       console.log(err)
   })
 }
-
+Peer._debug = console.log
 function _connect(data, recr){
   console.log(data)
   if(phonebook[data.callerId]) phonebook[data.callerId].signal(data.signal)
@@ -135,7 +135,8 @@ function _connect(data, recr){
     caller.on('error',e=> console.log(e))
     caller.on('signal', signal => {
       console.log(signal)
-      hub.broadcast(data.callerId, JSON.stringify({signal: signal, callerId: me.id}))
+      if (signal.renegotiate || signal.transceiverRequest) return
+      else hub.broadcast(data.callerId, JSON.stringify({signal: signal, callerId: me.id}))
     }) 
     caller.on('close', _ => {})
     caller.on('connect', e => {
