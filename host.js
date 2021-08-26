@@ -78,7 +78,8 @@ var mediaStream
 
 ui.callem.onclick = e =>{
     if(ui.callId.value){
-      hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
+      _connect({callerId: me.id}, true)
+      //hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
     }
 } 
 
@@ -124,12 +125,12 @@ function addMedia(id, audio=true, video=false){
       console.log(err)
   })
 }
-Peer._debug = console.log
-function _connect(data, recr){
+function _connect(data, init){
   console.log(data)
   if(phonebook[data.callerId]) phonebook[data.callerId].signal(data.signal)
   else{
-    var caller = new Peer({initiator: data.signal ? false : true, trickle: false, objectMode: false})
+    var caller = new Peer({initiator: init, trickle: false, objectMode: false})
+    caller._debug = console.log
     //caller.on('stream', stream => {})
     if(data.signal) caller.signal(data.signal)
     caller.on('error',e=> console.log(e))
