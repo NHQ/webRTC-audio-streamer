@@ -132,7 +132,7 @@ function _connect(data, recr){
     var caller = new Peer({initiator: data.signal ? false : true, trickle: false, objectMode: false})
     //caller.on('stream', stream => {})
     if(data.signal) caller.signal(data.signal)
-    caller.on('error',e=> console.log(error))
+    caller.on('error',e=> console.log(e))
     caller.on('signal', signal => {
       console.log(signal)
       hub.broadcast(data.callerId, JSON.stringify({signal: signal, callerId: me.id}))
