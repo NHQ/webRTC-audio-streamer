@@ -57,7 +57,7 @@ pipe.on('data', function(data){
   data = JSON.parse(data.toString())
   console.log(data)
   // callerID
-  initConnect(data.peerId, false, data.signal)
+  replySignal(data)
   //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
 })
 
