@@ -138,7 +138,7 @@ function initConnect(id, init, signal){
 }
 
 function replySignal(msg){
-  let peer = connecting[mes.peerId]
+  let peer = connecting[msg.peerId]
   if(!peer) initConnect(msg.peerId, false, msg.signal) 
   else peer.signal(msg.signal)
 }
