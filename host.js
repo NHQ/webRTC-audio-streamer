@@ -7,9 +7,9 @@ bus.once('iframeLoaded', e => {
   bus.emit('pong', {goat: 1})
   bus.on('clock', e => console.log(e))
 })
-var iframe = require('../iframarfi')
-var peering = iframe(require('./peering.js'))
-ui.peering.appendChild(peering)
+//var iframe = require('../iframarfi')
+//var peering = iframe(require('./peering.js'))
+//ui.peering.appendChild(peering)
 var Peer = require('simple-peer')
 var h = require('hyperscript')
 var signalhub = require('signalhub')
@@ -77,7 +77,6 @@ var recr
 var mediaStream
 
 ui.callem.onclick = e =>{
-  addMedia()
     if(ui.callId.value){
       hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
     }
@@ -131,7 +130,6 @@ function _connect(data, recr){
   if(phonebook[data.callerId]) phonebook[data.callerId].signal(data.signal)
   else{
     var caller = new Peer({initiator: data.signal ? false : true, trickle: false, objectMode: false})
-    phonebook[data.callerId] = caller
     //caller.on('stream', stream => {})
     if(data.signal) caller.signal(data.signal)
     caller.on('signal', signal => {
@@ -140,6 +138,7 @@ function _connect(data, recr){
     }) 
     caller.on('close', _ => {})
     caller.on('connect', e => {
+      phonebook[data.callerId] = caller
       //ps(tops(caller), tops(sink))
       caller.pipe(sink)
       //ael.play()
