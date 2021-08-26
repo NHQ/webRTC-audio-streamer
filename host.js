@@ -49,11 +49,6 @@ var mime = 'audio/webm;codecs=opus'
 var phonebook = {}
 
 if(session.id) ui.callId.value = ui.callId.innerText = session.id
-ui.demo.addEventListener('click', e => {
-  e.preventDefault()
-  addMedia()
-})
-//addMedia()
 var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
 var pipe = hub.subscribe(me.id)
 pipe.on('error', function(e){console.log(e)})
@@ -78,7 +73,7 @@ var mediaStream
 
 ui.callem.onclick = e =>{
     if(ui.callId.value){
-      _connect({callerId: me.id}, true)
+      _connect({callerId: ui.callId.value}, true)
       //hub.broadcast(ui.callId.value, JSON.stringify({callerId: me.id}))
     }
 } 
@@ -132,7 +127,7 @@ function _connect(data, init){
     var caller = new Peer({initiator: init, trickle: false, objectMode: false})
     caller._debug = console.log
     //caller.on('stream', stream => {})
-    //if(data.signal) caller.signal(data.signal)
+    if(data.signal) caller.signal(data.signal)
     caller.on('error',e=> console.log(e))
     caller.on('signal', signal => {
       console.log(signal)
@@ -143,9 +138,9 @@ function _connect(data, init){
     caller.on('connect', e => {
       phonebook[data.callerId] = caller
       //ps(tops(caller), tops(sink))
-      caller.pipe(sink)
+      //caller.pipe(sink)
       //ael.play()
-      caller.on('data', e => { if(Math.random < .1) console.log(e)} )
+      caller.on('data', e => { if(Math.random < .1) console.log('data', e)} )
       caller.on('close', e => {
         delete phonebook[data.callerId]
       })
