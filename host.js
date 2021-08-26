@@ -126,15 +126,18 @@ function initConnect(id, init, signal){
   var caller = new Peer({initiator: init, trickle: false, objectMode: false})
   if(signal) caller.signal(signal)
   connecting[id] = caller
-  caller._debug = function(str){
-    ui.debug.appendChild(h('p', str))
-  }
+  caller._debug = console.log
   caller.on('signal', sig => hub.broadcast(id, JSON.stringify({peerId: me.id, to: id, signal: sig})))
-  caller.on('connect', e => {
+  caller.once('connect', e => {
     phonebook[id] = caller
     connecting[id] = null
+    caller.pipe(sink)
     console.log('connected to ' + id)
   })
+  caller.on('close', e => {
+    delete phonebook[id]
+  })
+  caller.on('error', e => console.log(e))
 }
 
 function replySignal(msg){
