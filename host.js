@@ -69,7 +69,7 @@ pipe.on('data', function(data){
 
 console.log(session)
 if(session.call) {
-  hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
+///  hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
 }
 var sink = new msrc(ael).createWriteStream(mime)
 //var monitor = new msrc(ui.monitor).createWriteStream(mime)
