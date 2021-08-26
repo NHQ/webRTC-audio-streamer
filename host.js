@@ -124,10 +124,10 @@ var connecting = {}
 
 function initConnect(id, init, signal){
   var caller = new Peer({initiator: init, trickle: false, objectMode: false})
+  if(signal) caller.signal(signal)
   connecting[id] = caller
   caller._debug = console.log
   caller.on('signal', sig => hub.broadcast(id, JSON.stringify({peerId: me.id, to: id, signal: sig})))
-  if(signal) caller.signal(signal)
   caller.on('connect', e => {
     phonebook[id] = caller
     connecting[id] = null
