@@ -1,6 +1,4 @@
-var media 
-var ui = require('getids')()
-
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 var bus = require('./sharedEmitter')
 bus.once('iframeLoaded', e => {
   console.log(e)
@@ -10,22 +8,17 @@ bus.once('iframeLoaded', e => {
 //var iframe = require('../iframarfi')
 //var peering = iframe(require('./peering.js'))
 //ui.peering.appendChild(peering)
+var fs = require('fs')
 var Peer = require('simple-peer')
-var h = require('hyperscript')
 var signalhub = require('signalhub')
 const short = require('short-uuid');
-const msrc = require('mediasource')
 const toa = require('to-arraybuffer')
 const btob = require('blob-to-buffer')
-const cluster = require('webm-cluster-stream')
-const pump = require('pump')
-const mrecr = require('media-recorder-stream')
 //var master = new AudioContext
 //var mic = require('../jsynth-mic/stream')
-
-var ps = require('pull-stream')
-var tops = require('stream-to-pull-stream')
-var peers = {}
+var media 
+var ui = require('getids')()
+var runp =require('run-waterfall')
 var qs = require('querystring')
 var minimist = require('minimist')
 var argv = minimist(process.argv, {
@@ -45,30 +38,128 @@ var store = require('store')
 var session = qs.parse(window.location.search.slice(1))
 
 var ael = ui.player
-var mime = 'audio/webm;codecs=opus'
+var mime = 'audio/ogg;codecs=opus'
 var phonebook = {}
 
 if(session.id) ui.callId.value = ui.callId.innerText = session.id
-var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
-var pipe = hub.subscribe(me.id)
-pipe.on('error', function(e){console.log(e)})
-pipe.on('data', function(data){
-  // this needs to go into call waiting...
-  data = JSON.parse(data.toString())
-  console.log(data)
-  // callerID
-  replySignal(data)
-  //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
-})
 
 console.log(session)
-if(session.call) {
-///  hub.broadcast(session.id, JSON.stringify({callerId: me.id}))
+ui.init.onclick = e => {
+runp([captureSource, captureSink, captureNetwork].reverse(), (err, state)=>{
+  console.log(err, state)
+})
 }
-var sink = new msrc(ael).createWriteStream(mime)
-//var monitor = new msrc(ui.monitor).createWriteStream(mime)
-var recr 
-var mediaStream
+function captureNetwork(cb) {
+  var hub = signalhub(argv.protocol + '://' + argv.host + ':' + argv.port, 'meow')
+  var pipe = hub.subscribe(me.id)
+  pipe.on('error', function(e){console.log(e)})
+  pipe.on('data', function(data){
+    // this needs to go into call waiting...
+    data = JSON.parse(data.toString())
+    console.log(data)
+    // callerID
+    replySignal(data)
+    //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+  })
+  console.log('netCap')
+  cb(null, {network: {hub: hub}})
+}
+
+function captureSource (state, cb) {
+  // TODO source is either the mediastream or a peer connection
+  var OpusMediaRecorder = require('opus-media-recorder') 
+  window.MediaRecorder = OpusMediaRecorder;
+  // Web worker and .wasm configuration. Note: This is NOT a part of W3C standard.
+  const workerOptions = {
+    encoderWorkerFactory: function () {
+      // UMD should be used if you don't use a web worker bundler for this.
+      return new Worker(tob(fs.readFileSync('./public/encoderWorker.umd.js')))
+    },
+    OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/OggOpusEncoder.wasm')),
+    WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/WebMOpusEncoder.wasm'))
+  };
+  addMedia()
+  function addMedia(audio=true, video=false){
+
+    navigator.getUserMedia({video, audio}, function(stream){
+      //console.log(stream.getAudioTracks())
+
+      recr = new MediaRecorder(stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+      var bufr = []
+      // do same for host monitoring:
+      //for(var smith in phonebook) mediaStream.pipe(phonebook[smith]) 
+      //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
+      // Delete the encoder when finished with it (Emscripten does not automatically call C++ object destructors)
+      //encoder.delete();
+      recr.addEventListener('dataavailable', e => {
+        btob(e.data, (err, buf) => {
+          bufr.push(new Uint8Array(buf))
+          decoder.decode(buf)//.channelData[0])
+          for(var smith in phonebook) phonebook[smith].write(buf)
+        })
+      })
+
+      var sourceState = {
+        source: recr,
+        buffers: [] // switch to jbuffers
+      }
+      state.source = sourceState
+  console.log('sourceCap')
+  
+      cb(null, state)
+      
+      //recr.start(20)
+        
+      }, function(err){
+          cb(err, state)
+    })
+  }
+
+}
+
+function captureSink(state, cb){
+  var {OggOpusDecoder} = require('ogg-opus-decoder')
+
+  async function wsm(log){
+  
+    const decoder = new OggOpusDecoder({onDecode, onDecodeAll})
+    const  master = new AudioContext({sampleRate:48000})
+
+    function onDecode () {
+    }
+
+    function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
+      let sam = sampler(master, channelData)
+      sam.connect(master.destination)
+      sam.start(0)
+    }
+
+    await decoder.ready
+
+    var sinkState = {
+      sink: decoder,
+      context: master
+    }
+
+    log()
+    state.sink = sinkState
+  console.log('sinkCap')
+    cb(null, state)
+    
+  }
+
+
+  wsm(function(){console.log('WASM')})
+
+}
+
+
+
+function tob(buf){
+  return URL.createObjectURL(new Blob([new Buffer(buf).buffer], {type: 'application/wasm'}))
+}
+ 
+var peers = {}
 
 ui.callem.onclick = e =>{
     if(ui.callId.value){
@@ -82,45 +173,77 @@ ui.addMic.onclick = e => addMedia()
 function mute(torf){
   micStream.getAudioTracks()[0].enabled = torf
 }
+var sampler = require('../jsynth-file-sample')
 
-function addMedia(id, audio=true, video=false){
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
-
-  navigator.getUserMedia({video, audio}, function(stream){
-    //console.log(stream.getAudioTracks())
-    recr = new MediaRecorder(stream, {mimeType: mime, audioBitsPerSecond:40000})
-    // do same for host monitoring:
-//    ael.srcObj = stream
- // mediaStream = pump(new mrecr(stream,  {mimeType: mime, audioBitsPerSecond:40000, interval:20}), cluster(), e => {
-  //    console.log('stream ended')
-   // })
-
- // mediaStream.pipe(sink)
- // ael.play()
-    //for(var smith in phonebook) mediaStream.pipe(phonebook[smith]) 
-    //btob(e.data, (err, buf) => phonebook[smith].write(buf))
-    //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
-     
-    recr.addEventListener('dataavailable', e => {
-      //console.log(e)
-
-      btob(e.data, (err, buf) => {
-        //monitor.write(buf)
-        for(var smith in phonebook) phonebook[smith].write(buf)
-      })
-      //setTimeout(function(){ recr.stop() }, 3000)
-    })
-
-    recr.start(20)
-    //ael.play()
-    
-    
-  }, function(err){
-      console.log(err)
-  })
-}
 
 var connecting = {}
+function initBroadcast(){
+  // source cap then broadcast
+  session.broadcastId = short().generate()
+  sessios.distance = 0
+  session.maxConnections = 20
+  session.offersOut = 0
+  // be seekable when..
+  seekable(session)
+  return session
+}
+
+//const Time = require('since-when')
+function initListen(id){
+  let offerings = hub.subscribe('offer:'+me.id)
+  let best = Infinity
+  var chosen
+  var start = new Time
+  offersings.on('data', offer => {
+    if(offer.distance < best) {
+      best = offer.distance
+      chosen = offer
+    }
+  })
+  let t0 = setTimeout(e => {
+    if(chosen) {
+      hub.unsubscribe('offer:'+me.id)
+      // do chosen
+    } else {
+      
+    }
+  }, 1111)
+  
+}
+
+function unseekable(sessions){
+  hub.unsubscribe('seek:'+session.broadcastId)
+  if(!session.sourceCaptured) {
+  }
+
+}
+
+function isSeekWorthy(session){
+  let r = session.offersOut > Math.pow(session.distance, 2) * session.maxConnections
+  return r && session.maxConnections > session.connections.length && session.sourceCaptured
+}
+
+function seekable(session){  
+  let ses = hub.subscribe('seek:'+session.broadcastId)
+  ses.on('data', msg =>{
+    if (!isSeekWorthy(session)) return unseekable()
+    else if(Math.random() < 1 / Math.pow(session.distance, 2)) return
+    else{
+      session.offersOut += 1
+      setTimeout(e=>{
+        session.offersOut--
+        if(!isSeekWorthy(session)) unseekable()
+      }, 1111)
+
+      hub.broadcast('offer:'+session.broadcastId, JSON.stringify({
+        peerId: me.id,
+        to: msg.peerId,
+        distance: session.distance
+      }))
+    }
+
+  })
+}
 
 function initConnect(id, init, signal){
   var caller = new Peer({initiator: init, trickle: false, objectMode: false})
@@ -131,6 +254,8 @@ function initConnect(id, init, signal){
   caller.once('connect', e => {
     phonebook[id] = caller
     connecting[id] = null
+    ael.play()
+    //ps(tops(caller), tops(sink))
     caller.pipe(sink)
     console.log('connected to ' + id)
   })
@@ -147,41 +272,3 @@ function replySignal(msg){
 }
 
 
-function _connect(data, init){
-  console.log(data)
-  if(phonebook[data.from]) phonebook[data.from].signal(data.signal)
-  else{
-    var caller = new Peer({initiator: init, trickle: false, objectMode: false})
-    caller._debug = console.log
-    //caller.on('stream', stream => {})
-    if(data.signal) caller.signal(data.signal)
-    caller.on('error',e=> console.log(e))
-    caller.on('signal', signal => {
-      console.log(signal)
-      //if (signal.renegotiate || signal.transceiverRequest) return
-      hub.broadcast(data.from, JSON.stringify({signal: signal, from: me.id}))
-    }) 
-    caller.on('close', _ => {})
-    caller.on('connect', e => {
-      phonebook[data.callerId] = caller
-      //ps(tops(caller), tops(sink))
-      //caller.pipe(sink)
-      //ael.play()
-      caller.on('data', e => { if(Math.random < .1) console.log('data', e)} )
-      caller.on('close', e => {
-        delete phonebook[data.callerId]
-      })
-//      if(mediaStream) mediaStream.pipe(caller)
-      //var src = new MediaSource()
-      //ael.src = URL.createObjectURL( src )
-      /*src.onsourceopen = e => {
-        var srcBuf = src.addSourceBuffer(mime)
-        caller.on('data', e => {
-         // console.log(e)
-          srcBuf.appendBuffer(toa(e))
-        })
-      } */
-      console.log(`Connected to ${data.callerId}`)
-    }) 
-  }
-}
