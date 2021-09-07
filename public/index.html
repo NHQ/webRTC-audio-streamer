@@ -2,58 +2,97 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="./static/style.css">
+    <link rel="stylesheet" href="./static/app.css">
   </head>
   <body>
     <div class="display colCenter topCol">
-      <div id="app" class="join colCenter">
-        <h1 class=title>
-          Gabr
-        </h1>
-        <h2 class="monograph ul hide">
-          Podcast live-streaming, recording, and <br />real-time talk with listener call-in.
+        <div id=streamer class="flexCol colCenter grow">
+        <div class="rowCenter ">
+        <h2 class=title>
+          Gabr.app
         </h2>
-        <a href=/ id=demo class="demo hide">WoW sO dEmO</a>
-        <div class="features flexCol colCenter hide">
-          <h3>
-            Features and Ideas
-          </h3>
-          <ul class="flexCol">
-            <li>Live-Stream and Record Audio Podcasts</li>
-            <li>Host Listener Call-Ins, Talk Shows, Presentations</li>
-            <li>Accept payments and Donations</li>
-            <li>Charge for Subscriptions, Membership, or Call-ins</li>
-            <li>Public or Private Streams</li>
-            <li>Integrated Sponsor Portal</li>
-            <li>Runs in the Web Browser, no apps or phone numbers needed, <br /> but also works in mobile browsers</li>
-            <li>¿Asyncronous Audio Conversations?</li>
-            <li>¿Call & Response Convos?</li>
-            <li>Call 1-900-555-1337 $4.99 for the 1st minute...</li>
-
-          </ul>
-        </div>
-        <div id=streamer class="flexCol colCenter fsb">
+         </div>
+        <div id=splash class=hide>
+        <h2 class="monograph ul">
+          Live Stream Audio Broadcasting <br /> from your browser to the World<br /><br /> 
+        </h2>
           <div class="flexCol colCenter fsb">
-          <h2>Your ID:</h2>
-          <h3 id=myid></h3>
-          <button id=init class=largeButton>init</button>
+            <a href=/ class=button id=init class=largeButton>Start Your Live Stream</a>
           </div>
-          <div class="flexCol colCenter fsb callId">
-          <label for=callId><h3>Call an ID:</h3></label>
-          <input type=text id=callId class=largeTextInput placeholder="enter ID" />
-          <button id=callem class=largeButton>Call</button>
-          <button id=addMic class=largeButton>Add Mic</button>
+          <ul class="flexCol">
+            <li>No Signups Required</li>
+            <li>Stream to any size audience</li>
+            <li>Listeners can Call-In!</li>
+            <li>Coming Soon: Charge and Accept Donations</li>
+          </ul>
           </div>
-        </div>
-        <img src=GabrielHorn.png class=logo />
-          <audio id=player controls ></audio>
-          <audio id=monitor controls ></audio>
+            <div class="rowCenter fc">
+              <a href=gabr.app class="link hide">https://gabr.app/LlHSD7siLZzfs</a>
+            </div> 
+            <div class="rowCenter fso">
+              <div class="circle greenLightOn"></div>
+              <p>Live</p>
+              <a href=/ class=abutton id=init>start</a>
+              <a href=/ class=abutton id=copy>copy link</a>
+              <a href=/ class=abutton id=share>share</a>
+            </div> 
+            <div class="rowCenter fullw">
+              <img id=monitor src=./static/1F3A7.svg class="invert large glyph"></img>
+              <div id=muteMonitor class="selected green button glyph" ></div>
+              <input type=range ></input>
+            </div> 
+            <div class="rowCenter fullw">
+              <img id=microphone src=./static/1F3A4.svg class="invert large glyph"></img>
+              <div id=muteMic class="selected button green glyph"></div>
+              <input type=range ></input>
+            </div> 
+            <div class="rowCenter fullw">
+              <img id=callSource src=./static/1F4DE.svg class="invert large glyph"></img>
+              <div id=muteCall class="unselected  button toma glyph"></div>
+              <input type=range ></input>
+            </div> 
+            <div class="rowCenter fullw">
+              <img id=trackSource src=./static/1F3B5.svg class="invert large glyph"></img>
+              <div id=muteTrack class="unselected button toma glyph" ></div>
+              <input type=range ></input>
+            </div> 
+          <div id=tracks class="colCenter jcfs border grow">
+            <p class=tidy>This is the main control panel for stream and volume (headphones, mic, caller, audio).    
+            To play music or audio tracks goto [ ].  Too answer call-ins, go to [ ].
+            To see your page view, go to [ ].  For member comments, go to [ ].
+            </p>
+            <div class="caller rowCenter fc hide">
+              <p class=abutton>La_Macarena.mp3</p>
+              <img id=trackSource src=./static/25B6.svg class="invert glyph"></img>
+              <img id=trackSource src=./static/23F9.svg class="invert glyph"></img>
+            </div>
+            <div class="caller rowCenter fc hide">
+              <p class=abutton>Angel Bojainglz</p>
+              <img id=callSource src=./static/1F4DE.svg class="invert glyph"></img>
+              <img id=callSource src=./static/E24E.svg class="invert glyph"></img>
+            </div>
+          </div>
+            <div class="rowCenter fso fullw">
+              <label for=file>
+              <img id=trackSource src=./static/1F3B6.svg class="invert glyph large bordered"></img>
+              </label>
+              <input id=file name=file type=file class=hide></input>
+              <img id=trackSource src=./static/260E.svg class="glyph invert large bordered"></img>
+              <img id=trackSource src=./static/1F4F7.svg class="glyph invert large bordered"></img>
+              <img id=trackSource src=./static/E044.svg class="glyph invert large bordered"></img>
+              <img id=trackSource src=./static/E248.svg class="glyph invert large bordered"></img>
+            </div>
+          <div class="flexCol colCenter fsb hide">
+            <a href=/ class=button id=callId class=largeButton>Scan QR Code</a>
+          </div>
+          <audio class=hide id=player controls ></audio>
+          <audio class=hide id=monitor controls ></audio>
           <div id=debug class="flexCol colCenter fsb hide"></div>
           <div id=peering class=hide></div>
-      </div>
     </div>
-    <script type="text/javascript" src="bundle.js"></script>
+    <script type="text/javascript" src="./static/bundle.js"></script>
   </body>
 </html>

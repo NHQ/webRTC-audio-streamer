@@ -1,0 +1,1 @@
+console.error("Error: Can't walk dependency graph: Cannot find module 'pull-stream-to-stream' from '/home/johnny/projects/p2pconsent/listen.js'\n    required by /home/johnny/projects/p2pconsent/listen.js");
