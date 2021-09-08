@@ -407,6 +407,7 @@ require('domready')(re => {
     window.MediaRecorder = OpusMediaRecorder;
     // Web worker and .wasm configuration. Note: This is NOT a part of W3C standard.
     var gam = window.navigator.getUserMedia || window.navigator.webkitGetUserMedia
+    _log(`getUserMedia? ${!!gam}`)
     gam({video, audio}, function(stream){
       //console.log(stream.getAudioTracks())
 
