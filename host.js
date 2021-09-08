@@ -9,7 +9,6 @@ require('domready')(re => {
       ui.debug.appendChild(h('p', e.toString()))    
   }
   _log('hohoh')
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
   var bus = require('./sharedEmitter')
   bus.once('iframeLoaded', e => {
     console.log(e)
@@ -50,11 +49,12 @@ require('domready')(re => {
 
   ui.init.onclick = e => {
     _log('init')
+    ui.streamer.webkitRequestFullScreen()
     try{
-    runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
-      console.log(err, state)
-      state.source.source.pipe(state.sink.sink) // heh
-      state.network.network.seekable()
+      runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
+        console.log(err, state)
+        state.source.source.pipe(state.sink.sink) // heh
+        state.network.network.seekable()
     })} catch (err){
       _log(err)
     }
