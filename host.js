@@ -1,6 +1,6 @@
 
 require('domready')(re => {
-  if(!window.AudioContext) window.AudioContext = window.webkiAudioContext  
+  const WebAudioContext = window.AudioContext || window.webkitAudioContext
   var master 
   var h = require('hyperscript')
   var ui = require('getids')()
@@ -61,7 +61,7 @@ require('domready')(re => {
   }
 
   function initCast(cb){
-    master = new window.AudioContext({sampleRate: 48000})
+    master = new WebAudioContext({sampleRate: 48000})
     const state = {broadcasting: true}
     var uxer = store.get('uxer')
     if(!uxer) {
