@@ -33,8 +33,11 @@ var argv = minimist(process.argv, {
   }
 })
 
-window.store = store
+require('domready', re => {
 nana(e => console.log(e))
+
+})
+window.store = store
 
 var ael = ui.player
 var mime = 'audio/ogg;codecs=opus'
@@ -42,6 +45,7 @@ var mime = 'audio/ogg;codecs=opus'
 ui.init.onclick = e => {
   runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
     console.log(err, state)
+    state.source.source.pipe(state.sink.sink) // heh
   })
 }
 
@@ -67,6 +71,11 @@ function initCast(cb){
   monitor.connect(master.destination)
   state.monitor = monitor
   console.log(session)
+  ui.monitorRange.addEventListener('change', e => {
+    console.log(e.target.value)
+    monitor.gain.value = Number(e.target.value)
+  })
+  master.resume()
   //if(session.id) ui.callId.value = ui.callId.innerText = session.id
   cb(null, state)
 }
@@ -98,7 +107,7 @@ function captureSource (state, cb) {
       const restream = master.createMediaStreamDestination()
       mixer.connect(restream)
       mic.connect(mixer, 0, 1)
-      const recr = new MediaRecorder(restream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+      const recr = new MediaRecorder(restream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
       mixer.connect(state.monitor)
       state.uxer.mic = stream
       state.uxer.micNode = mic
@@ -114,12 +123,13 @@ function captureSource (state, cb) {
         btob(e.data, (err, buf) => {
           bufr.push(new Uint8Array(buf))
           strSrc.write(buf)
+      console.log(true)
           //for(var smith in state.network.phonebook) state.network.phonebook[smith].write(buf)
         })
       })
 
       var sourceState = {
-        source: recr,
+        source: strSrc,
         buffers: bufr // switch to jbuffers
       }
       state.source = sourceState
@@ -127,7 +137,7 @@ function captureSource (state, cb) {
   
       cb(err, state)
       
-      //recr.start(20)
+      recr.start(20)
     
     })
   }
@@ -155,8 +165,10 @@ function captureSink(state, cb){
 
     await decoder.ready
 
-    const sinkStream = thru(buf => {
+    const sinkStream = thru((buf, enc, cb) => {
+      console.log(true)
       decoder.decode(buf)
+      cb()
     }, e =>{})
 
     var sinkState = {

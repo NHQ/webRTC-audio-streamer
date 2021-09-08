@@ -15,6 +15,7 @@
     "brfs": "^2.0.2",
     "choo": "^7.1.0",
     "custom-event": "^1.0.0",
+    "domready": "^1.0.8",
     "drag-drop": "^2.1.0",
     "getids": "^0.2.0",
     "hyperscript": "^2.0.2",
