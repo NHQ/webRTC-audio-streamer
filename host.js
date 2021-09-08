@@ -1,6 +1,6 @@
 
 require('domready')(re => {
- AudioContext = AudioContext || window.AudioContext || window.webkiAudioContext  
+  if(!window.AudioContext) window.AudioContext = window.webkiAudioContext  
   
   var h = require('hyperscript')
   var ui = require('getids')()
