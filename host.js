@@ -1,4 +1,5 @@
 require('domready')(re => {
+  const master = new AudioContext({sampleRate: 48000})
   var h = require('hyperscript')
   var ui = require('getids')()
   _log = e =>{
@@ -6,7 +7,6 @@ require('domready')(re => {
       ui.debug.appendChild(h('p', e.toString()))    
   }
   _log('hohoh')
-  var master
   navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
   var bus = require('./sharedEmitter')
   bus.once('iframeLoaded', e => {
@@ -59,7 +59,6 @@ require('domready')(re => {
   }
 
   function initCast(cb){
-    master = new AudioContext({sampleRate: 48000})
     const state = {broadcasting: true}
     var uxer = store.get('uxer')
     if(!uxer) {
