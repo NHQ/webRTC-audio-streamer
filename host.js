@@ -49,7 +49,6 @@ require('domready')(re => {
 
   ui.init.onclick = e => {
     _log('init')
-    ui.streamer.webkitRequestFullScreen()
     try{
       runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
         console.log(err, state)
