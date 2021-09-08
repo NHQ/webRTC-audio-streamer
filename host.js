@@ -33,7 +33,7 @@ var argv = minimist(process.argv, {
   }
 })
 
-require('domready', re => {
+require('domready')(re => {
 nana(e => console.log(e))
 
 })
