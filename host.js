@@ -105,6 +105,9 @@ require('domready')(re => {
     
     if(state.broadcasting){
       addMedia((err, stream) =>{
+        _log(`mediaStream added? ${(!!stream)}`)
+        _log(`mediaStream error? ${(err)}`)
+
         const workerOptions = {
           encoderWorkerFactory: function () {
             // UMD should be used if you don't use a web worker bundler for this.
@@ -121,6 +124,7 @@ require('domready')(re => {
         mixer.connect(restream)
         mic.connect(mixer, 0, 1)
         const recr = new MediaRecorder(restream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+        _log(`mediaRecorder added? ${(!!recr)}`)
         mixer.connect(state.monitor)
         state.uxer.mic = stream
         state.uxer.micNode = mic
