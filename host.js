@@ -1,4 +1,4 @@
-const  master = new AudioContext({sampleRate:48000})
+var master
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 var bus = require('./sharedEmitter')
 bus.once('iframeLoaded', e => {
@@ -50,6 +50,7 @@ ui.init.onclick = e => {
 }
 
 function initCast(cb){
+  master = new AudioContext({sampleRate: 48000})
   const state = {broadcasting: true}
   var uxer = store.get('uxer')
   if(!uxer) {
