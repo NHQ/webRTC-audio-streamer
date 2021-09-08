@@ -1,6 +1,7 @@
 
 require('domready')(re => {
-const AudioContext = AudioContext || window.AudioContext || window.webkiAudioContext  
+ AudioContext = AudioContext || window.AudioContext || window.webkiAudioContext  
+  
   var h = require('hyperscript')
   var ui = require('getids')()
   _log = e =>{
