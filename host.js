@@ -48,10 +48,14 @@ require('domready')(re => {
 
   ui.init.onclick = e => {
     _log('init')
+    try{
     runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
       console.log(err, state)
       state.source.source.pipe(state.sink.sink) // heh
-    })
+      state.network.network.seekable()
+    })} catch (err){
+      _log(err)
+    }
   }
 
   function initCast(cb){
@@ -83,6 +87,7 @@ require('domready')(re => {
     })
     master.resume()
     //if(session.id) ui.callId.value = ui.callId.innerText = session.id
+    _log('stateInit')
     cb(null, state)
   }
   function captureNetwork(state, cb) {
