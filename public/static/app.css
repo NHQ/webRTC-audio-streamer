@@ -199,11 +199,18 @@ h1, h2, h3, h4{
   background-repeat: no-repeat;
   background-position: center;
 }
-
+.live::after{
+  content: 'Live';
+  margin-left: 2em;
+}
 .offair{
   border:1px solid gray;
   filter: saturate(20%);
   box-shadow:none;
+}
+.offair::after{
+  content: 'Off-Air';
+  margin-left: 2em;
 }
 
 .grow{
@@ -295,4 +302,7 @@ background-position: center;
 .tidy{
   padding: 1.5em;
   font-size: 16px;
+}
+.fs{
+  align-contents: flex-start;
 }
