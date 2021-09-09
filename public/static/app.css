@@ -191,29 +191,29 @@ h1, h2, h3, h4{
 }
 .live{
   border-radius: 50%;
-  width:1rem;
-  height:1rem;
+  width:2rem;
+  height:2rem;
   align-self:center;
   justify-self:center;
   margin:.5rem;
   box-shadow: 0 0 6px orange, inset 0 0 12px crimson;
-  background-image: url(./E0A1.svg), radial-gradient(white, red);
+  background-image: url(./E0A1.svg), radial-gradient(yellow, red);
   background-size: fit;
   background-repeat: no-repeat;
   background-position: center;
+    transition-property: filter;
+  transition-duration: 666ms;
+  transition-delay: 0s;
 }
-.live::after{
-  content: 'Live';
-  margin-left: 2em;
+.func:checked + .targeted{
+  filter: saturate(33%) blur(1px);
+}
+.func2:checked + .targeted{
+  
+  filter: saturate(100) blur(0);
 }
 .offair{
-  border:1px solid gray;
-  filter: saturate(20%);
   box-shadow:none;
-}
-.offair::after{
-  content: 'Off-Air';
-  margin-left: 2em;
 }
 
 .grow{
