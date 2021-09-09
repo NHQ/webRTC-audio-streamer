@@ -9,71 +9,76 @@
   </head>
   <body>
     <div class="display colCenter topCol">
-        <div id=streamer class="flexCol colCenter grow">
+      <div id=streamer class="flexCol colCenter grow ">
         <div class="rowCenter ">
-        <h2 class=title>
-          Gabr.app
-        </h2>
+          <h2 class=title>
+            Gabr.app
+          </h2>
          </div>
-        <div id=splash class=hide>
-        <h2 class="monograph ul">
-          Live Stream Audio Broadcasting <br /> from your browser to the World<br /><br /> 
-        </h2>
-          <div class="flexCol colCenter fsb">
-            <a href=/ class=button id=init class=largeButton>Start Your Live Stream</a>
+        <div class="rowCenter fc">
+          <a href=gabr.app class="link hide">https://gabr.app/LlHSD7siLZzfs</a>
+        </div> 
+        <div class="rowCenter fc">
+          <div class="rowCenter fc">
+            <div class="live "></div>
+            <p>Live</p>
           </div>
-          <ul class="flexCol">
-            <li>No Signups Required</li>
-            <li>Stream to any size audience</li>
-            <li>Listeners can Call-In!</li>
-            <li>Coming Soon: Charge and Accept Donations</li>
-          </ul>
+          <div class="rowCenter fc">
+            <div class="live offair"></div>
+            <p>Off-Air</p>
           </div>
-            <div class="rowCenter fc">
-              <a href=gabr.app class="link hide">https://gabr.app/LlHSD7siLZzfs</a>
-            </div> 
-            <div class="rowCenter fso">
-              <div class="circle greenLightOn"></div>
-              <p>Live</p>
-              <button class=button id=init>start</button>
-              <a href=/ class=abutton id=copy>copy link</a>
-              <a href=/ class=abutton id=share>share</a>
-            </div> 
-            <div class="rowCenter fullw">
-              <img src=./static/1F3A7.svg class="invert large glyph"></img>
-              <div id=muteMonitor class="selected green button glyph" ></div>
-              <input id=monitorRange min=0 max=1 step=".08" val=".5" type=range ></input>
-            </div> 
-            <div class="rowCenter fullw">
-              <img id=microphone src=./static/1F3A4.svg class="invert large glyph"></img>
-              <div id=muteMic class="selected button green glyph"></div>
-              <input type=range ></input>
-            </div> 
-            <div class="rowCenter fullw">
-              <img id=callSource src=./static/1F4DE.svg class="invert large glyph"></img>
-              <div id=muteCall class="unselected  button toma glyph"></div>
-              <input type=range ></input>
-            </div> 
-            <div class="rowCenter fullw">
-              <img id=trackSource src=./static/1F3B5.svg class="invert large glyph"></img>
-              <div id=muteTrack class="unselected button toma glyph" ></div>
-              <input type=range ></input>
-            </div> 
-          <div id=tracks class="colCenter jcfs border grow">
+        </div> 
+        <div class="rowCenter fc">
+          <a class=abutton id=init>start</a>
+          <a href=/ class=abutton id=copy>copy link</a>
+          <a href=/ class=abutton id=share>share</a>
+        </div>
+        <div class="rowCenter fullw">
+          <label for=mutemonitor>
+            <input type=checkbox class=hide name=mm id=mutemonitor />
+            <div id=muteMonitor class="target selected green button glyph" ></div>
+          </label>
+          <input id=monitorRange min=0 max=1 step=".02" val=".5" type=range ></input>
+          <img src=./static/1F3A7.svg class="invert glyph"></img>
+        </div> 
+        <div class="rowCenter fullw bc">
+          <label for=mutemic>
+            <input type=checkbox class=hide name=mmi id=mutemic />
+            <div id=muteMic class="target selected button green glyph"></div>
+          </label>
+          <input type=range ></input>
+          <img id=microphone src=./static/1F3A4.svg class="invert glyph"></img>
+        </div> 
+        <div class="rowCenter fullw bc">
+          <label for=mutecall>
+            <input type=checkbox class=hide name=mmii id=mutecall checked/>
+            <div id=muteCall class="target selected green button glyph"></div>
+          </label>
+          <input type=range ></input>
+          <img id=callSource src=./static/1F4DE.svg class="invert glyph"></img>
+        </div> 
+        <div class="rowCenter fullw bc">
+          <label for=mutetrack>
+            <input type=checkbox class=hide name=mmii id=mutetrack checked/>
+          <div id=muteTrack class="target selected green button glyph" ></div>
+          <input type=range ></input>
+          <img id=trackSource src=./static/1F3B5.svg class="invert glyph"></img>
+        </div> 
+          <div id=tracks class="colCenter jcfs border grow bc">
           <div id=debug class="flexCol colCenter fsb grow"></div>
             <p class=hide>This is the main control panel for stream and volume (headphones, mic, caller, audio).    
             To play music or audio tracks goto [ ].  Too answer call-ins, go to [ ].
             To see your page view, go to [ ].  For member comments, go to [ ].
             </p>
-            <div class="caller rowCenter fc hide">
+            <div id=audiotrack class="caller rowCenter fc">
               <p class=abutton>La_Macarena.mp3</p>
-              <img id=trackSource src=./static/25B6.svg class="invert glyph"></img>
-              <img id=trackSource src=./static/23F9.svg class="invert glyph"></img>
+              <img id=audiotrackstart src=./static/25B6.svg class="invert glyph"></img>
+              <img id=audiotrackstop src=./static/23F9.svg class="invert glyph"></img>
             </div>
-            <div class="caller rowCenter fc hide">
+            <div class="callertrack rowCenter fc">
               <p class=abutton>Angel Bojainglz</p>
-              <img id=callSource src=./static/1F4DE.svg class="invert glyph"></img>
-              <img id=callSource src=./static/E24E.svg class="invert glyph"></img>
+              <img id=calltrackanswer src=./static/1F4DE.svg class="invert glyph"></img>
+              <img id=calltrackhangup src=./static/E24E.svg class="invert glyph"></img>
             </div>
           </div>
             <div class="rowCenter fso fullw hide">
@@ -89,6 +94,20 @@
           <div class="flexCol colCenter fsb hide">
             <a href=/ class=button id=callId class=largeButton>Scan QR Code</a>
           </div>
+        <div id=splash class=hide>
+          <h2 class="monograph ul">
+            Live Stream Audio Broadcasting <br /> from your browser to the World<br /><br /> 
+          </h2>
+          <div class="flexCol colCenter fsb">
+            <a href=/ class=button id=init class=largeButton>Start Your Live Stream</a>
+          </div>
+          <ul class="flexCol">
+            <li>No Signups Required</li>
+            <li>Stream to any size audience</li>
+            <li>Listeners can Call-In!</li>
+            <li>Coming Soon: Charge and Accept Donations</li>
+          </ul>
+        </div>
           <audio class=hide id=player controls ></audio>
           <audio class=hide id=monitor controls ></audio>
           <div id=peering class=hide></div>

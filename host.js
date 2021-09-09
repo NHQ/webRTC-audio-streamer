@@ -8,7 +8,6 @@ require('domready')(re => {
       console.log(e)
       ui.debug.appendChild(h('p', e.toString()))    
   }
-  _log('hohoh')
   var bus = require('./sharedEmitter')
   bus.once('iframeLoaded', e => {
     console.log(e)
@@ -41,7 +40,11 @@ require('domready')(re => {
     }
   })
 
-  nana(e => console.log(e))
+  nana(e => {
+    e.preventDefault()
+    console.log(e)
+  })
+  
   window.store = store
 
   var ael = ui.player
@@ -49,6 +52,7 @@ require('domready')(re => {
 
   ui.init.onclick = e => {
     _log('init')
+
     try{
       runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
         console.log(err, state)
