@@ -40,17 +40,13 @@ require('domready')(re => {
     }
   })
 
-  nana(e => {
-    e.preventDefault()
-    console.log(e)
-  })
   
   window.store = store
 
   var ael = ui.player
   var mime = 'audio/ogg;codecs=opus'
 
-  ui.init.onclick = e => {
+  ui.init.addEventListener('change', e => {
     _log('init')
 
     try{
@@ -61,7 +57,7 @@ require('domready')(re => {
     })} catch (err){
       _log(err)
     }
-  }
+  })
 
   function initCast(cb){
     master = new WebAudioContext({sampleRate: 48000})

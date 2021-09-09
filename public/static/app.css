@@ -10,12 +10,16 @@ label{
   align-self: center;
 }
 
-input[type=checkbox]:checked + .target {
+.vol:checked + .target {
 background-color:tomato;
 background-image: url(./1F507.svg);
 background-size:68%;
 background-repeat: no-repeat;
 background-position: center;
+}
+
+.func:checked + .target{
+  filter: invert(68%);
 }
 
 h1{
@@ -129,7 +133,6 @@ h1, h2, h3, h4{
   color:rebeccapurple;
   align-self:center;
  -webkit-text-stroke:1px skyblue;
- text-shadow: 0 0 6px white;
 
 }
 
