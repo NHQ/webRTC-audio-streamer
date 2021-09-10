@@ -16,25 +16,27 @@
           </h2>
          </div>
         <div class="rowCenter fc fullw">
-          <div class="rowCenter fc fullw ">
-            <label for=end>
-              <p class="target abutton">Stop</p>
-            </label>
+          <div class="rowCenter fc fullw wrap">
             <input type=radio class="func hide" id=end name=sem value=end checked />
-            <div class="live targeted"></div>
-            <label for=init>
-            <input type=radio class="func2 hide" id=init name=sem value=init />
-              <p class="target abutton">start</p>
+            <input type=radio class="func2 hide" id=init name=sem value=init  />
+            <label for=end class=endlabel>
+              <p class="target abutton">End Session</p>
             </label>
-          </div>
-          <div class="rowCenter fc hide">
-            <div class="live offair"></div>
+
+            <div class="live targeted"></div>
+            <label for=init class=startlabel>
+              <p class="target abutton">Gab Live</p>
+            </label>
           </div>
         </div> 
         <div class="rowCenter fc">
-          <a href=gabr.app class="link">https://gabr.app/LlHSD7siLZzfs</a>
-          <a href=/ class=abutton id=copy>copy link</a>
-          <a href=/ class="abutton hide" id=share>share</a>
+          <pre style="user-select:all" class="link" id=link>https://gabr.app/LlHSD7siLZzfs</pre>
+          <input type=checkbox id=copybutton name=copybutton class="hide buttbox" value=copy checked />
+          <label for=copybutton class=buttlabel>
+          <p class=abutton id=copy>copy link</p>
+          </label>
+          
+          <p href=/ class="abutton hide" id=share>share</p>
         </div> 
         <div class="rowCenter fullw">
           <label for=mutemonitor>
@@ -68,7 +70,7 @@
           <img id=trackSource src=./static/1F3B5.svg class="invert glyph"></img>
         </div> 
           <div id=tracks class="colCenter jcfs border grow bc fs">
-          <div id=debug class="flexCol colCenter fs grow "></div>
+          <div id=debug class="flexCol colCenter fs grow hide"></div>
             <p class=hide>This is the main control panel for stream and volume (headphones, mic, caller, audio).    
             To play music or audio tracks goto [ ].  Too answer call-ins, go to [ ].
             To see your page view, go to [ ].  For member comments, go to [ ].

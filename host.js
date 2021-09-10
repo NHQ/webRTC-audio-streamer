@@ -46,6 +46,10 @@ require('domready')(re => {
   var ael = ui.player
   var mime = 'audio/ogg;codecs=opus'
 
+  ui.copybutton.onchange = e => {
+    navigator.clipboard.writeText(ui.link.innerText)
+  }
+
   ui.init.addEventListener('change', e => {
     _log('init')
 

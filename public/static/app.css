@@ -181,7 +181,7 @@ h1, h2, h3, h4{
 }
 
 .fullw{
-  width:95%;
+  width:100%;
 }
 
 .status{
@@ -196,21 +196,38 @@ h1, h2, h3, h4{
   align-self:center;
   justify-self:center;
   margin:.5rem;
-  box-shadow: 0 0 6px orange, inset 0 0 12px crimson;
+  box-shadow: 0 0 6px black, 0 0 12px #fefe33, inset 0 0 12px crimson;
   background-image: url(./E0A1.svg), radial-gradient(yellow, red);
   background-size: fit;
   background-repeat: no-repeat;
   background-position: center;
-    transition-property: filter;
-  transition-duration: 666ms;
+  transition-property: box-shadow, filter;
+  transition-duration: 666ms, 2000ms;
   transition-delay: 0s;
+  transition-timing-function: ease-in;
 }
-.func:checked + .targeted{
+.endlabel, .startlabel{
+  filter: grayscale(90%) opacity(20%);
+}
+.func:checked ~ .targeted{
   filter: saturate(33%) blur(1px);
+  box-shadow: 0 0 0 black, 0 0 0 #fefe33, inset 0 0 0 crimson;
 }
-.func2:checked + .targeted{
-  
-  filter: saturate(100) blur(0);
+.func2:checked ~ .targeted{
+  filter: saturate(1.6) blur(0);
+}
+.func2:checked ~ .endlabel{
+  filter: none;
+}
+.func:checked ~ .startlabel{
+  filter: none;
+}
+
+.func2:checked ~ .intro{
+  filter: opacity(1);
+}
+.func:checked ~ .outro{
+  filter: opacity(1);
 }
 .offair{
   box-shadow:none;
@@ -222,13 +239,15 @@ h1, h2, h3, h4{
 
 input[type="range"]{
   align-self:center;
+  color: #fefe33;
+  filter: hue-rotate(30deg) invert(66%) saturate(20);
 }
 .link{
-  color:#fdff00;
+  color:dodgerblue;
   text-decoration: none;
   align-self:center;
   margin:.5rem;
-  border-bottom: 1px solid orangered;
+  border-bottom: .05rem solid skyblue;
   font-size:60%;
 }
 img.button, div.button{
@@ -236,7 +255,7 @@ img.button, div.button{
   align-self:center;
   margin:.5rem;
   text-decoration: none;
-  border: 1px solid black;
+  border: .05rem solid black;
   border-radius:4px;
   font-weight:900; 
   text-shadow: 0 0 8px whitesmoke;
@@ -266,18 +285,27 @@ background-repeat: no-repeat;
 background-position: center;
 }
 .abutton{
-  color:#fdff00;
+  color:dodgerblue;
   align-self:center;
   margin:.5rem ;
   text-decoration: none;
-  border: 1px solid #fdff00;
+  border: .05rem solid skyblue;
   padding: .125rem .5rem;
   border-radius:4px;
-  font-weight:300; 
+  font-weight:100; 
   font-size:60%;
-  font-family: Helvetica;
-  filter:saturate(85%);
+  font-family: Roboto, Helvetica;
 }
+
+.buttlabel{
+  transition-property: filter;
+  transition-duration: 33ms;
+  transition-delay: 0s;
+}
+.buttlabel:active{
+  filter: invert(1);
+}
+
 .glyph{
   width:2rem;
   height:2rem;
@@ -307,5 +335,23 @@ background-position: center;
   font-size: 16px;
 }
 .fs{
-  align-contents: flex-start;
+  justify-self: flex-start;
+}
+.wrap{
+  flex-wrap: wrap;
+}
+.intro, .outro{
+  line-height:0;
+  margin:0;
+  transition-property: filter;
+  transition-duration: 222ms;
+  transition-delay: 444ms;
+  text-align:center;
+  filter:opacity(0);
+  font-size:80%;
+  color: dodgerblue;
+  color: #fefe33;
+}
+.outro{
+  color: #fefe33;
 }
