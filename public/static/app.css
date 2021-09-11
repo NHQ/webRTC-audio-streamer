@@ -7,9 +7,13 @@ body{
 }
 label{
   display:flex;
-  align-self: center;
+  flex-direction:column;
+  align-items: center;
+  justify-content:center;
 }
-
+pre{
+  margin:0;
+}
 .vol:checked + .target {
 background-color:tomato;
 background-image: url(./1F507.svg);
@@ -34,10 +38,7 @@ h1, h2, h3, h4{
 }
 
 .display{
-  height: 100%;
   max-width:720px;
-  width:98%;
-  overflow-y:scroll;
 }
 .display * {
   justify-self: stretch;
@@ -62,7 +63,8 @@ h1, h2, h3, h4{
   display:flex;
   justify-content:center;
   align-items:center;
-  margin: 0 .5em;
+  margin:  .5em;
+  margin: 0 .5rem;
 }
 
 .colCenter{
@@ -183,6 +185,11 @@ h1, h2, h3, h4{
 .fullw{
   width:100%;
 }
+.full{
+  width:100%;
+  height:100%;
+}
+
 
 .status{
   border: 1px solid black;
@@ -196,26 +203,26 @@ h1, h2, h3, h4{
   align-self:center;
   justify-self:center;
   margin:.5rem;
-  box-shadow: 0 0 6px black, 0 0 12px #fefe33, inset 0 0 12px crimson;
+  box-shadow: 0 0 3px black, 0 0 6px #fefe33, inset 0 0 12px crimson;
   background-image: url(./E0A1.svg), radial-gradient(yellow, red);
   background-size: fit;
   background-repeat: no-repeat;
   background-position: center;
   transition-property: box-shadow, filter;
-  transition-duration: 666ms, 2000ms;
+  transition-duration: 33ms, 666ms;
   transition-delay: 0s;
-  transition-timing-function: ease-in;
+  transition-timing-function: ease-in, ease-in-out;
 }
 .endlabel, .startlabel{
   filter: grayscale(90%) opacity(20%);
 }
 .func:checked ~ .targeted{
-  filter: saturate(33%) blur(1px);
+  filter: saturate(33%) blur(1px) hue-rotate(20deg);
   transition-duration: 0ms;
   box-shadow: 0 0 0 black, 0 0 0 #fefe33, inset 0 0 0 crimson;
 }
 .func2:checked ~ .targeted{
-  filter: saturate(1.6) blur(0);
+  filter: saturate(1.6) blur(0) hue-rotate(0);
 }
 .func2:checked ~ .endlabel{
   filter: none;
@@ -247,10 +254,20 @@ input[type="range"]{
   color:dodgerblue;
   text-decoration: none;
   align-self:center;
-  margin:.5rem;
+  margin:0;
   border-bottom: .05rem solid skyblue;
   font-size:60%;
 }
+
+.reg{
+  border:none;
+  color:whitesmoke;
+}
+
+.ul {
+  text-decoration:underline;
+}
+
 img.button, div.button{
   color:black;
   align-self:center;
@@ -299,24 +316,25 @@ background-position: center;
 }
 
 .buttlabel{
-  transition-property: filter;
-  transition-duration: 33ms;
-  transition-delay: 0s;
 }
 .buttlabel:active{
   filter: invert(1);
+  transition-property: filter;
+  transition-duration: 333ms;
+  transition-delay: 0ms;
 }
 
 .glyph{
   width:2rem;
   height:2rem;
-  padding:.25em;
+  padding:0;
   align-self:center;
 }
 .large{
   width:3rem;
   height:3rem;
   padding:.5em;
+  margin:.5em;
 }
 .invert{
     filter: invert(1);
@@ -355,4 +373,10 @@ background-position: center;
 }
 .outro{
   color: #fefe33;
+}
+.m1 {
+  margin: .5rem .5rem;
+}
+.p1{
+  padding:.5rem;
 }

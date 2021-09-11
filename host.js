@@ -45,34 +45,54 @@ require('domready')(re => {
 
   var ael = ui.player
   var mime = 'audio/ogg;codecs=opus'
+    ui.init.addEventListener('change', e => {
+      _log('init')
 
-  ui.copybutton.onchange = e => {
-    navigator.clipboard.writeText(ui.link.innerText)
-  }
+      try{
+        runp([captureSource, captureSink, captureNetwork, initCast, initUI, initAudio, initState].reverse(), (err, app)=>{
+          console.log(err, app)
+      //    app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
+      //    app.network.seekable()
+      })} catch (err){
+        _log(err)
+      }
+    })
 
-  ui.init.addEventListener('change', e => {
-    _log('init')
 
-    try{
-      runp([captureSource, captureSink, captureNetwork, initCast].reverse(), (err, state)=>{
-        console.log(err, state)
-        state.source.source.pipe(state.sink.sink) // heh
-        state.network.network.seekable()
-    })} catch (err){
-      _log(err)
+  function initState(cb){
+
+    class App {
+    
+      constructor(){
+        this.mic = 1/2
+        this.monitor = 1/2
+        this.call = 1/2
+        this.track = 1/2
+        this.quality = 64000
+        this.update = null
+        makeAutoObservable(this)
+      }
+
+      setGain(dial, value){
+        this[dial] = value
+        this.update = [dial, value]
+      }
+    
     }
-  })
 
-  function initCast(cb){
-    master = new WebAudioContext({sampleRate: 48000})
-    const state = {broadcasting: true}
+    const app = new App
+    console.log(app)
+    bus.on('appStateChange', e =>{
+      app.setGain(e[0], e[1])
+    })
+    
     var uxer = store.get('uxer')
     if(!uxer) {
       uxer = {id: short().generate()}
       store.set('uxer', uxer)
     }
     //ui.myid.innerText = me.id
-    state.uxer = uxer
+    app.uxer = uxer
     var session = qs.parse(window.location.search.slice(1))
     if(!session.channel) {
       var pre = store.get('sessionRestore')
@@ -80,37 +100,94 @@ require('domready')(re => {
       else session = pre
     }
     if(!session.channel) session.channel = short().generate()
-    state.session = session
+    session.broadcasting = true
+    app.session = session
     store.set('sessionRestore', session)
-    const monitor = master.createGain()
-    monitor.connect(master.destination)
-    state.monitor = monitor
-    console.log(session)
+    cb(null, app)
+  }
+
+  function initAudio(app, cb){
+    const audio = {}
+    master = new WebAudioContext({sampleRate: 48000})
+    audio.master = master
+    audio.mixer = master.createChannelMerger(2)
+    audio.restream = master.createMediaStreamDestination()
+    audio.monitor = master.createGain()
+    audio.mic = master.createGain()
+    audio.call = master.createGain()
+    audio.track = master.createGain()
+
+
+    audio.mixer.connect(audio.restream)
+    audio.mixer.connect(audio.monitor)
+
+    audio.monitor.connect(master.destination)
+    audio.mic.connect(audio.mixer)
+    audio.call.connect(audio.mixer)
+    audio.track.connect(audio.mixer)
+
+    autorun(()=>{
+      if(app.update) {
+        audio[app.update[0]].gain.value = Math.max(0, app.update[1])//.monitor
+      } 
+    })
+
+    app.audio = audio
+    master.resume()
+    cb(null, app)
+  }
+
+  function initUI(app, cb){
+    ui.copybutton.onchange = e => {
+      navigator.clipboard.writeText(ui.link.innerText)
+    }
+
+    ;[].forEach.call(document.querySelectorAll('input[type=range]'), e => {
+      e.addEventListener('change', ev => {
+        bus.emit('appStateChange', [ev.target.name, Number(ev.target.value)])
+      })
+    })
+
+    ;[].forEach.call(document.querySelectorAll('[data-mute]'), e => {
+      e.addEventListener('change', ev => {
+        bus.emit('appStateChange', [ev.target.dataset.mute, - app[ev.target.dataset.mute]])
+      })
+    })
+
+
     ui.monitorRange.addEventListener('change', e => {
       console.log(e.target.value)
-      monitor.gain.value = Number(e.target.value)
+      //bus.emit('appStateChange', ['monitor', Number(e.target.value)])
+      //app.setGain('monitor', Number(e.target.value))
     })
-    master.resume()
+
+    cb(null,app)
+
+  }
+
+
+  function initCast(app, cb){
     //if(session.id) ui.callId.value = ui.callId.innerText = session.id
     _log('stateInit')
-    cb(null, state)
+    cb(null, app)
   }
-  function captureNetwork(state, cb) {
-    var network = new Network(state, argv.protocol + '://' + argv.host + ':' + argv.port)
+  function captureNetwork(app, cb) {
+    var network = new Network(app, argv.protocol + '://' + argv.host + ':' + argv.port)
     _log('netCap')
-    state.network = {network: network}
+    app.network = network
 
-    cb(null, state)
+    cb(null, app)
   }
 
-  function captureSource (state, cb) {
+  function captureSource (app, cb) {
     // TODO source is either the mediastream or a peer connection
     
-    if(state.broadcasting){
+    if(app.session.broadcasting){
       addMedia((err, stream) =>{
         _log(`mediaStream added? ${(!!stream)}`)
         _log(`mediaStream error? ${(err)}`)
 
+        console.log(err)
         const workerOptions = {
           encoderWorkerFactory: function () {
             // UMD should be used if you don't use a web worker bundler for this.
@@ -119,21 +196,22 @@ require('domready')(re => {
           OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
           WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
         };
+        console.log(stream)
 
-        const mic = jmic(master, stream)
-        const mixer = master.createChannelMerger(8)
-
-        const restream = master.createMediaStreamDestination()
-        mixer.connect(restream)
-        mic.connect(mixer, 0, 1)
+        const mic = app.audio.master.createMediaStreamSource(stream) 
+        const mixer = app.audio.mixer 
+        const restream = app.audio.restream 
+        
+        
+        mic.connect(app.audio.mic)
         const recr = new MediaRecorder(restream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
         _log(`mediaRecorder added? ${(!!recr)}`)
-        mixer.connect(state.monitor)
-        state.uxer.mic = stream
-        state.uxer.micNode = mic
+        app.audio.mediastream = stream
+        app.audio.micnode = mic
         var bufr = []
+        app.audio.buffer = bufr
         const strSrc = thru()
-        state.network.sourceStream = strSrc
+        app.audio.sourceStream = strSrc
         // do same for host monitoring:
         //for(var smith in phonebook) mediaStream.pipe(phonebook[smith]) 
         //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
@@ -151,12 +229,12 @@ require('domready')(re => {
           source: strSrc,
           buffers: bufr // switch to jbuffers
         }
-        state.source = sourceState
+
        _log('sourceCap')
     
-        cb(err, state)
-        
         recr.start(20)
+        cb(err, app)
+        
       
       })
     }
@@ -166,7 +244,7 @@ require('domready')(re => {
 
   }
 
-  function captureSink(state, cb){
+  function captureSink(app, cb){
     var {OggOpusDecoder} = require('ogg-opus-decoder')
 
     async function wsm(log){
@@ -177,8 +255,8 @@ require('domready')(re => {
       }
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
-        let sam = sampler(master, channelData)
-        sam.connect(master.destination)
+        let sam = sampler(app.audio.master, channelData)
+        sam.connect(app.audio.master.destination)
         sam.start(0)
       }
 
@@ -194,9 +272,9 @@ require('domready')(re => {
       }
 
       log()
-      state.sink = sinkState
+      app.audio.sinkStream = sinkStream
       _log('sinkCap')
-      cb(null, state)
+      cb(null, app)
       
     }
 
@@ -238,11 +316,11 @@ require('domready')(re => {
 
   class Network { 
 
-    constructor(state, addr){
+    constructor(app, addr){
       const self = this
       //console.log(state, addr)
-      this.hub = signalhub(addr, state.session.channel)
-      this.state = state
+      this.hub = signalhub(addr, app.session.channel)
+      this.state = app.state
       this.connections = {}
       this.connecting = {}
       this.distance = -1

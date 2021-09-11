@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./static/app.css">
   </head>
   <body>
-    <div class="display colCenter topCol">
+    <div class="display colCenter topCol jc">
       <div id=streamer class="flexCol colCenter grow ">
         <div class="rowCenter ">
           <h2 class="title hide">
@@ -38,49 +38,75 @@
           
           <p href=/ class="abutton hide" id=share>share</p>
         </div> 
+        <div class="colCenter fullw fs">
         <div class="rowCenter fullw">
           <label for=mutemonitor>
-            <input type=checkbox class="vol hide" name=mm id=mutemonitor />
+            <input type=checkbox class="vol hide" name=mm data-mute="monitor" id=mutemonitor />
             <div id=muteMonitor class="target selected green button glyph" ></div>
           </label>
-          <input id=monitorRange min=0 max=1 step=".02" val=".5" type=range ></input>
+          <input id=monitorRange name=monitor min=0 max=1 step=".02" val=".5" type=range ></input>
           <img src=./static/1F3A7.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
           <label for=mutemic>
-            <input type=checkbox class="vol hide" name=mmi id=mutemic />
+            <input type=checkbox class="vol hide" name=mmi data-mute=mic id=mutemic />
             <div id=muteMic class="target selected button green glyph"></div>
           </label>
-          <input type=range ></input>
+          <input id=micRange name=mic min=0 max=1 step=".02" val=".5" type=range ></input>
           <img id=microphone src=./static/1F3A4.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
           <label for=mutecall>
-            <input type=checkbox class="vol hide" name=mmii id=mutecall checked/>
+            <input type=checkbox class="vol hide" name=mmii id=mutecall data-mute=call checked/>
             <div id=muteCall class="target selected green button glyph"></div>
           </label>
-          <input type=range ></input>
+          <input id=callRange name=call min=0 max=1 step=".02" val=".5" type=range ></input>
           <img id=callSource src=./static/1F4DE.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
           <label for=mutetrack>
-            <input type=checkbox class="vol hide" name=mmii id=mutetrack checked/>
-          <div id=muteTrack class="target selected green button glyph" ></div>
-          <input type=range ></input>
+            <input type=checkbox class="vol hide" name=mmii id=mutetrack data-mute=track checked/>
+            <div id=muteTrack class="target selected green button glyph" ></div>
+          </label>
+          <input id=trackRange name=track min=0 max=1 step=".02" val=".5" type=range ></input>
           <img id=trackSource src=./static/1F3B5.svg class="invert glyph"></img>
         </div> 
-          <div id=tracks class="colCenter jcfs border grow bc fs">
-          <div id=debug class="flexCol colCenter fs grow hide"></div>
+        </div>
+        <div class="colCenter m1">
+        <pre class="reg p1 ul">Features</pre>
+        <div class="rowCenter fsb">
+            <div class="colCenter fso invert large bordered"> 
+              <label for=file class=full >
+              <img id=trackSource src=./static/1F3B5.svg class="glyph "></img>
+              <pre class="invert link reg">+Audio</pre>
+              <pre class="invert link reg">Track</pre>
+              </label>
+              <input id=file name=file type=file class=hide></input>
+            </div>
+            <div class="colCenter fso invert large bordered"> 
+              <label for=request class=full>
+                <img id=trackSource src=./static/260E.svg class="glyph"></img>
+                <pre class="invert link reg">Request</pre>
+                <pre class="invert link reg">Call-in</pre>
+              </label>
+              <input id=request name=request type=checkbox class=hide></input>
+            </div>
+        
+        </div>
+        </div>
+          <div id=tracks class="m1 colCenter jcfs border grow bc fs">
+          <div id=debug class="m1 flexCol colCenter fs grow hide"></div>
             <p class=hide>This is the main control panel for stream and volume (headphones, mic, caller, audio).    
             To play music or audio tracks goto [ ].  Too answer call-ins, go to [ ].
             To see your page view, go to [ ].  For member comments, go to [ ].
             </p>
-            <div id=audiotrack class="caller rowCenter fc">
+            <pre class="reg p1 ul hide">Tracks</pre>
+            <div id=audiotrack class="caller rowCenter fc hide" data-template >
               <p class=abutton>La_Macarena.mp3</p>
               <img id=audiotrackstart src=./static/25B6.svg class="invert glyph"></img>
               <img id=audiotrackstop src=./static/23F9.svg class="invert glyph"></img>
             </div>
-            <div class="callertrack rowCenter fc">
+            <div class="callertrack rowCenter fc hide" data-template >
               <p class=abutton>Angel Bojainglz</p>
               <img id=calltrackanswer src=./static/1F4DE.svg class="invert glyph"></img>
               <img id=calltrackhangup src=./static/E24E.svg class="invert glyph"></img>
