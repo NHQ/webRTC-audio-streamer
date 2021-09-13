@@ -453,7 +453,7 @@ require('domready')(re => {
         } else {
           _log('Err: No source peer found.')    
         }
-      }, 1000)
+      }, 3000)
       
 
       this.hub.broadcast('source', 
