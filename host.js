@@ -437,24 +437,24 @@ require('domready')(re => {
           this.hub.unsubscribe(mask)
           // do chosen
           bus.emit('sourcePeerIdCaptured', chosen.peerId)
-          self.sourceCap(chosen)
+          //self.sourceCap(chosen)
+          let peer = this.initConnect(chosen.peerId, true, mask)
+          peer.once('connect', e => {
+            bus.emit('sourcePeerCaptured', peer)
+            this.distance = chosen.distance + 1
+            this.sourceStream = peer
+            _log('Source Peer Captured.')
+
+          })
+          peer.on('close', e => {
+            _log('Source Peer Closed')
+
+          })
         } else {
           _log('Err: No source peer found.')    
         }
       }, 1000)
       
-      let peer = this.initConnect(chosen.peerId, true, mask)
-      peer.once('connect', e => {
-        bus.emit('sourcePeerCaptured', peer)
-        this.distance = chosen.distance + 1
-        this.sourceStream = peer
-        _log('Source Peer Captured.')
-
-      })
-      peer.on('close', e => {
-        _log('Source Peer Closed')
-
-      })
 
       this.hub.broadcast('source', 
         JSON.stringify({
