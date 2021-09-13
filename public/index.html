@@ -30,7 +30,7 @@
           </div>
         </div> 
         <div class="rowCenter fc">
-          <pre style="user-select:all" class="link" id=link>https://gabr.app/LlHSD7siLZzfs</pre>
+          <pre style="user-select:all" class="link" id=livelink>https://gabr.app/LlHSD7siLZzfs</pre>
           <input type=checkbox id=copybutton name=copybutton class="hide buttbox" value=copy checked />
           <label for=copybutton class=buttlabel>
           <p class=abutton id=copy>copy link</p>
@@ -44,7 +44,7 @@
             <input type=checkbox class="vol hide" name=mm data-mute="monitor" id=mutemonitor />
             <div id=muteMonitor class="target selected green button glyph" ></div>
           </label>
-          <input id=monitorRange name=monitor min=0 max=1 step=".02" val=".5" type=range ></input>
+          <input id=monitorRange name=monitor min=0 max=1 step=".02" value=".5" type=range ></input>
           <img src=./static/1F3A7.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
@@ -52,23 +52,23 @@
             <input type=checkbox class="vol hide" name=mmi data-mute=mic id=mutemic />
             <div id=muteMic class="target selected button green glyph"></div>
           </label>
-          <input id=micRange name=mic min=0 max=1 step=".02" val=".5" type=range ></input>
+          <input id=micRange name=mic min=0 max=1 step=".02" value=".5" type=range ></input>
           <img id=microphone src=./static/1F3A4.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
           <label for=mutecall>
-            <input type=checkbox class="vol hide" name=mmii id=mutecall data-mute=call checked/>
+            <input type=checkbox class="vol hide" name=mmii id=mutecall data-mute=call />
             <div id=muteCall class="target selected green button glyph"></div>
           </label>
-          <input id=callRange name=call min=0 max=1 step=".02" val=".5" type=range ></input>
+          <input id=callRange name=call min=0 max=1 step=".02" value=".5" type=range ></input>
           <img id=callSource src=./static/1F4DE.svg class="invert glyph"></img>
         </div> 
         <div class="rowCenter fullw bc">
           <label for=mutetrack>
-            <input type=checkbox class="vol hide" name=mmii id=mutetrack data-mute=track checked/>
+            <input type=checkbox class="vol hide" name=mmii id=mutetrack data-mute=track/>
             <div id=muteTrack class="target selected green button glyph" ></div>
           </label>
-          <input id=trackRange name=track min=0 max=1 step=".02" val=".5" type=range ></input>
+          <input id=trackRange name=track min=0 max=1 step=".02" value=".5" type=range ></input>
           <img id=trackSource src=./static/1F3B5.svg class="invert glyph"></img>
         </div> 
         </div>
@@ -81,7 +81,7 @@
               <pre class="invert link reg">+Audio</pre>
               <pre class="invert link reg">Track</pre>
               </label>
-              <input id=file name=file type=file class=hide></input>
+              <input id=file name=file type=file class=hide accept="audio/*" />
             </div>
             <div class="colCenter fso invert large bordered"> 
               <label for=request class=full>
@@ -113,10 +113,10 @@
             </div>
           </div>
             <div class="rowCenter fso fullw hide">
-              <label for=file>
+              <label for=audiofile>
               <img id=trackSource src=./static/1F3B6.svg class="invert glyph large bordered"></img>
               </label>
-              <input id=file name=file type=file class=hide></input>
+              <!--input id=audiofile name=file type=file class=hide></input--!>
               <img id=trackSource src=./static/260E.svg class="glyph invert large bordered"></img>
               <img id=trackSource src=./static/1F4F7.svg class="glyph invert large bordered"></img>
               <img id=trackSource src=./static/E044.svg class="glyph invert large bordered"></img>

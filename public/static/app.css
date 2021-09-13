@@ -198,8 +198,8 @@ h1, h2, h3, h4{
 }
 .live{
   border-radius: 50%;
-  width:2rem;
-  height:2rem;
+  width:4rem;
+  height:4rem;
   align-self:center;
   justify-self:center;
   margin:.5rem;
@@ -217,7 +217,7 @@ h1, h2, h3, h4{
   filter: grayscale(90%) opacity(20%);
 }
 .func:checked ~ .targeted{
-  filter: saturate(33%) blur(1px) hue-rotate(20deg);
+  filter: saturate(33%) blur(0) hue-rotate(20deg);
   transition-duration: 0ms;
   box-shadow: 0 0 0 black, 0 0 0 #fefe33, inset 0 0 0 crimson;
 }

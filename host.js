@@ -27,6 +27,7 @@ require('domready')(re => {
   const thru = require('through2')
   var store = require('store')
   var jmic = require('../jsynth-mic/stream')
+  var sampler = require('../jsynth-file-sample')
   var media 
   var runp =require('run-waterfall')
   var qs = require('querystring')
@@ -40,23 +41,31 @@ require('domready')(re => {
     }
   })
 
-  
+  var app 
+
   window.store = store
 
-  var ael = ui.player
-  var mime = 'audio/ogg;codecs=opus'
+  runp([initState, initUI], (err, app)=>{
+    app = app
+
     ui.init.addEventListener('change', e => {
       _log('init')
 
       try{
-        runp([captureSource, captureSink, captureNetwork, initCast, initUI, initAudio, initState].reverse(), (err, app)=>{
+        runp([captureSource, captureSink, captureNetwork, initAudio, initCast(app)].reverse(), (err, app)=>{
           console.log(err, app)
-      //    app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
-      //    app.network.seekable()
+     //     app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
+          if(app.session.broadcasting) app.network.seekable()
+          else app.network.sourceSeek(app.session.stream)
       })} catch (err){
         _log(err)
       }
     })
+    
+  })
+
+  var ael = ui.player
+  var mime = 'audio/ogg;codecs=opus'
 
 
   function initState(cb){
@@ -81,28 +90,23 @@ require('domready')(re => {
     }
 
     const app = new App
-    console.log(app)
     bus.on('appStateChange', e =>{
       app.setGain(e[0], e[1])
     })
-    
-    var uxer = store.get('uxer')
-    if(!uxer) {
-      uxer = {id: short().generate()}
-      store.set('uxer', uxer)
+    var session = store.get('session')
+    if(!session) session = {id: short().generate().split().reverse().join().slice(0,11)}
+    var q = qs.parse(window.location.search.slice(1))
+    if(q.stream) {
+      session.stream = q.stream
     }
-    //ui.myid.innerText = me.id
-    app.uxer = uxer
-    var session = qs.parse(window.location.search.slice(1))
-    if(!session.channel) {
-      var pre = store.get('sessionRestore')
-      if(!pre) session = {}
-      else session = pre
+    else {
+      session.stream = session.stream || short().generate().split().reverse().join().slice(0,11)
+      session.broadcasting = true
     }
-    if(!session.channel) session.channel = short().generate()
-    session.broadcasting = true
+
     app.session = session
-    store.set('sessionRestore', session)
+    store.set('session', session)
+    console.log(app)
     cb(null, app)
   }
 
@@ -138,12 +142,29 @@ require('domready')(re => {
   }
 
   function initUI(app, cb){
+
+    ui.livelink.innerText = 'https://gabr.vercel.app?stream='+app.session.stream
     ui.copybutton.onchange = e => {
       navigator.clipboard.writeText(ui.link.innerText)
     }
 
+    ui.file.addEventListener('change', e => {
+      console.log(e.target.files[0])
+      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(e.target.files[0])})
+      ui.tracks.appendChild(a)
+      var c= app.audio.master.createMediaElementSource(a)
+      console.log(a)
+      c.connect(app.audio.track)
+      btob(e.target.files[0], (err, buf) => {
+        sampler(app.audio.master, buf.buffer, (err, node) =>{
+          //node.connect(app.audio.master.destination)
+          //node.start(0)
+        })      
+      })
+    })
+
     ;[].forEach.call(document.querySelectorAll('input[type=range]'), e => {
-      e.addEventListener('change', ev => {
+      e.addEventListener('input', ev => {
         bus.emit('appStateChange', [ev.target.name, Number(ev.target.value)])
       })
     })
@@ -166,10 +187,13 @@ require('domready')(re => {
   }
 
 
-  function initCast(app, cb){
-    //if(session.id) ui.callId.value = ui.callId.innerText = session.id
-    _log('stateInit')
-    cb(null, app)
+  function initCast(app){
+  
+    return function(cb){
+      _log('stateInit')
+      cb(null, app)
+    
+    }
   }
   function captureNetwork(app, cb) {
     var network = new Network(app, argv.protocol + '://' + argv.host + ':' + argv.port)
@@ -296,7 +320,6 @@ require('domready')(re => {
   function mute(torf){
     micStream.getAudioTracks()[0].enabled = torf
   }
-  var sampler = require('../jsynth-file-sample')
 
 
   var connecting = {}
@@ -319,7 +342,9 @@ require('domready')(re => {
     constructor(app, addr){
       const self = this
       //console.log(state, addr)
-      this.hub = signalhub(addr, app.session.channel)
+      this.hub = signalhub(addr, app.session.stream)
+      this.channel = app.session.stream
+      this.id = app.session.id
       this.state = app.state
       this.connections = {}
       this.connecting = {}
@@ -328,6 +353,12 @@ require('domready')(re => {
       this.maxConnections = 4 // start low, test high, also helps spread early pcast testing
       this.duration = null // since-when
       this.channels = {}
+      this.sinkStream = thru(buf => {
+        for(var n in this.peers){
+          let p = this.peers[n]
+          if(p.writable) p.write(buf)
+        }
+      }, function close(){})
     }
 
 
@@ -340,19 +371,42 @@ require('domready')(re => {
       //delete this.connections[addr]
     }
 
-    openPeer(id){ // callers to this channel (a mask) will get peered
-      let pipe = this.hub.subscribe(id)
-      pipe.on('error', e => console.log.apply(this, arguments))
-      pipe.on('data', function(data){
-        data = JSON.parse(data.toString())
-        // callerID
-        let peer = self.replySignal(data)
-        peer.once('connect', e => {
-          this.hub.unsubscribe(id)
-        })
-        //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+    disallowCalls(){
+      this.hub.unsubscribe('caller:'+this.id)
+    }
+
+    allowCalls(){
+      let calls = this.hub.subscribe('caller:'+this.id)
+      calls.on('data', msg=>{
+        msg=JSON.parse(msg)
+        bus.emit('caller', msg)
       })
-      //this._seekable()
+      bus.on('call', msg =>{
+        this.callDirect(msg.peerId)
+      })
+
+    }
+
+    initCall(id){
+      
+      this.hub.broadcast('caller:'+id, {peerId: this.id})
+      let peer = this.initConnect(id, false, this.id)
+      peer.once('connected', e =>{
+        this.callers[id] = peer
+        bus.emit('Call Source Captured', peer)
+
+      })
+      
+      
+    }
+
+    callDirect(id){
+      let peer = this.initConnect(id, true, this.id)
+      peer.once('connected', e =>{
+        this.callers[id] = peer
+        bus.emit('Call Source Captured', peer)
+
+      })
     }
 
     sourceSeek(){ // id for a peer stream
@@ -376,11 +430,23 @@ require('domready')(re => {
           bus.emit('sourcePeerIdCaptured', chosen.peerId)
           self.sourceCap(chosen)
         } else {
-          
+          _log('Err: No source peer found.')    
         }
       }, 1000)
+      
+      let peer = this.initConnect(chosen.peerId, true, mask)
+      peer.once('connect', e => {
+        bus.emit('sourcePeerCaptured', peer)
+        this.distance = chosen.distance + 1
+        this.sourceStream = peer
+        _log('Source Peer Captured.')
 
-      this.openPeer(mask)
+      })
+      peer.on('close', e => {
+        _log('Source Peer Closed')
+
+      })
+
       this.hub.broadcast('source', 
         JSON.stringify({
           peerId: mask
@@ -388,26 +454,12 @@ require('domready')(re => {
       )
       
     }
-    sourceCap(chosen){
-      let peer = this.initConnect(chosen.peerId, true, null)
-      peer.once('connect', e => {
-        bus.emit('sourcePeerCaptured', peer)
-        this.distance = chosen.distance + 1
-        this.sourceStream = peer
-      })
-
-    }
 
     set sourceStream(stream){
       this._sourceStream = stream
-      stream.pipe(state.sink)//.channelData[0])
       this.duration = new Time()
-      for(var n in this.connections) {
-        let x= this.connections[n]
-        if(x.writable && !(stream == x)){
-          stream.pipe(x)
-        }
-      }
+      stream.pipe(this.sinkStream)
+      stream.pipe(app.audio.sinkStream)
     }
 
     get sourceStream(){
@@ -434,9 +486,16 @@ require('domready')(re => {
           self.offersOut += 1
           setTimeout(e=>{
             self.offersOut--
+            self.disinitConnect(msg.peerId, mask)
           }, 1111)
           let mask = short().generate()
-          self.openPeer(mask)
+          let peer = self.init(msg.peerId, false, mask)
+          peer.once('connect', e =>{
+            this.peers[msg.peerId] = peer
+          })
+          peer.once('close', e =>{
+            delete this.peers[msg.peerId]
+          })
           self.hub.broadcast(msg.peerId, JSON.stringify({
             peerId: mask,
             to: msg.peerId,
@@ -445,41 +504,43 @@ require('domready')(re => {
           }))
         
         }
-
       })
     }
 
-    initConnect(id, init, signal){
+    disinitConnect(id, mask){
+      delete this.connecting[id]
+      this.hub.unsubscribe(mask)
+    }
+
+    initConnect(id, init, mask){
       var self = this
+      let pipe = this.hub.subscribe(mask)
       var caller = new Peer({initiator: init, trickle: false, objectMode: false})
-      if(signal) caller.signal(signal)
       this.connecting[id] = caller
+      pipe.on('error', e => console.log.apply(this, arguments))
+      pipe.on('data', function(data){
+        data = JSON.parse(data.toString())
+        // callerID
+        var peer = this.connecting[msg.peerId]
+        peer.signal(msg.signal)
+        peer.once('connect', e => {
+          this.hub.unsubscribe(mask)
+        })
+        //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
+      })
       caller._debug = console.log
-      caller.on('signal', sig => this.hub.broadcast(id, JSON.stringify({peerId: self.id, to: id, signal: sig })))
+      caller.on('signal', sig => this.hub.broadcast(id, JSON.stringify({peerId: mask, to: id, signal: sig })))
       caller.once('connect', e => {
         this.connections[id] = caller
         this.connecting[id] = null
-        if(this.sourceStream) this.sourceStream.pipe(caller)
-        console.log('connected to ' + id)
-        this.hub.unsubscribe(id)
-        if(this.isSeekWorthy()) this.seekable()
+        console.log(`connected to ${Object.keys(this.connections).length} peers`)
       })
       caller.on('close', e => {
-        delete this.connections[id]
-        if(this.isSeekWorthy()) this.seekable()
+        this.disinitConnect(id, mask)
       })
       caller.on('error', e => console.log(e))
       return caller
     }
-
-    replySignal(msg){
-      var peer = this.connecting[msg.peerId]
-      if(!peer) peer = this.initConnect(msg.peerId, false, msg.signal) 
-      else peer.signal(msg.signal)
-      return peer
-    }
-
-
 
   }
 
