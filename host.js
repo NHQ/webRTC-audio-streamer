@@ -216,7 +216,7 @@ require('domready')(re => {
   function captureSource (app, cb) {
     // TODO source is either the mediastream or a peer connection
     
-    if(app.session.broadcasting){
+    if(true || app.session.broadcasting){
       addMedia((err, stream) =>{
         _log(`mediaStream added? ${(!!stream)}`)
         _log(`mediaStream error? ${(err)}`)
