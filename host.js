@@ -425,7 +425,7 @@ require('domready')(re => {
       let best = 0//Infinity
       var chosen
       var start = new Time
-      offersings.on('data', offer => {
+      offerings.on('data', offer => {
         let score = (1 / offer.distance) * offer.duration
         if(score > best) {
           best = score //offer.distance
