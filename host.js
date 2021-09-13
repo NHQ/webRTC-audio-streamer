@@ -468,6 +468,7 @@ require('domready')(re => {
       this._sourceStream = stream
       this.duration = new Time()
       stream.pipe(this.sinkStream)
+      stream.pipe(app.audio.sinkStream)
     }
 
     get sourceStream(){
