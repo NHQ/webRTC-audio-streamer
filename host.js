@@ -221,7 +221,7 @@ require('domready')(re => {
         _log(`mediaStream added? ${(!!stream)}`)
         _log(`mediaStream error? ${(err)}`)
 
-        _log(err)
+        console.log(err)
         const workerOptions = {
           encoderWorkerFactory: function () {
             // UMD should be used if you don't use a web worker bundler for this.
@@ -230,6 +230,7 @@ require('domready')(re => {
           OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
           WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
         };
+        console.log(stream)
 
         const mic = app.audio.master.createMediaStreamSource(stream) 
         const mixer = app.audio.mixer 
