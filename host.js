@@ -4,10 +4,6 @@ require('domready')(re => {
   var master 
   var h = require('hyperscript')
   var ui = require('getids')()
-  _log = e =>{
-      console.log(e)
-      ui.debug.appendChild(h('p', e.toString()))    
-  }
   var bus = require('./sharedEmitter')
   bus.once('iframeLoaded', e => {
     console.log(e)
@@ -41,8 +37,15 @@ require('domready')(re => {
       protocol: 'https'
     }
   })
+  var debub = signalhub('https://folkstack.com:80', 'debug')
+  //var ret=debub.subscribe('return')
 
   var app 
+  _log = e =>{
+      console.log(e)
+      ui.debug.appendChild(h('p', e.toString()))    
+      debub.broadcast('debug', JSON.stringify(e))
+  }
 
   window.store = store
 
