@@ -26,6 +26,7 @@ require('domready')(re => {
   const btob = require('blob-to-buffer')
   const thru = require('through2')
   var store = require('store')
+  const Time = require('../since-when')
   var jmic = require('../jsynth-mic/stream')
   var sampler = require('../jsynth-file-sample')
   var media 
@@ -55,8 +56,13 @@ require('domready')(re => {
         runp([captureSource, captureSink, captureNetwork, initAudio, initCast(app)].reverse(), (err, app)=>{
           console.log(err, app)
      //     app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
-          if(app.session.broadcasting) app.network.seekable()
-          else app.network.sourceSeek(app.session.stream)
+          if(app.session.broadcasting) {
+            app.network.sourceStream = app.audio.sourceStream
+            app.network.distance = 1
+            app.network.seekable()
+          
+          }
+          else app.network.sourceSeek()
       })} catch (err){
         _log(err)
       }
@@ -95,13 +101,14 @@ require('domready')(re => {
     })
     var session = store.get('session')
     if(!session) session = {id: short().generate().split().reverse().join().slice(0,11)}
+    session.broadcasting = true
     var q = qs.parse(window.location.search.slice(1))
     if(q.stream) {
       session.stream = q.stream
+      session.broadcasting = false 
     }
     else {
       session.stream = session.stream || short().generate().split().reverse().join().slice(0,11)
-      session.broadcasting = true
     }
 
     app.session = session
@@ -334,7 +341,6 @@ require('domready')(re => {
     return session
   }
 
-  //const Time = require('since-when')
 
 
   class Network { 
@@ -349,7 +355,7 @@ require('domready')(re => {
       this.connections = {}
       this.connecting = {}
       this.distance = -1
-      this.offerOut = 0
+      this.offersOut = 0
       this.maxConnections = 4 // start low, test high, also helps spread early pcast testing
       this.duration = null // since-when
       this.channels = {}
@@ -459,7 +465,6 @@ require('domready')(re => {
       this._sourceStream = stream
       this.duration = new Time()
       stream.pipe(this.sinkStream)
-      stream.pipe(app.audio.sinkStream)
     }
 
     get sourceStream(){
@@ -471,14 +476,15 @@ require('domready')(re => {
     }
 
     isSeekWorthy(){
-      let r = this.offersOut > Math.pow(this.distance, 2) * this.maxConnections
-      this._seekable = r && this.maxConnections > Object.keys(this.connections).length  && this._sourceStream
+      let r = this.offersOut < Math.pow(this.distance, 2) * this.maxConnections
+      this._seekable = r && this.maxConnections > Object.keys(this.connections).length  && this.sourceStream
       return this._seekable
     }
 
     seekable(){ 
       const self = this
       let ses = this.hub.subscribe('source')
+      _log(`Seekable? ${this.isSeekWorthy()}`)
       ses.on('data', msg =>{
         if (!self.isSeekWorthy()) return self.unseekable('source')
         else if(Math.random() < 1 / Math.pow(self.distance, 2)) return
