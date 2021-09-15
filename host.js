@@ -606,10 +606,10 @@ require('domready')(re => {
       this.connecting[id] = caller
       pipe.on('error', e => console.log.apply(this, arguments))
       pipe.on('data', function(data){
-        data = JSON.parse(data.toString())
+        data = JSON.parse(data)
         // callerID
-        var peer = this.connecting[msg.peerId]
-        peer.signal(msg.signal)
+        var peer = self.connecting[data.peerId]
+        peer.signal(data.signal)
         peer.once('connect', e => {
           // close mask hub
         })
