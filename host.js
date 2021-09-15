@@ -354,10 +354,13 @@ require('domready')(re => {
         peer.on('data', buf => {
           app._log(buf.length)
           try{
-            decoder.ready.then(() => decoder.decode(buf))
+            decoder.ready.then(() => decoder.decode(buf), err => {
+              app._log(err.toString())
+              decoder.ready.then(()=>decoder.free())
+            })
           } catch(err){
-            app._log(err.toString())
-            decoder.ready.then(()=>decoder.free())
+              app._log(err.toString())
+            
           }
         })
       })
