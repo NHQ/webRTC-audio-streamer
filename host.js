@@ -177,6 +177,7 @@ require('domready')(re => {
       btob(e.data, (err, buf) => {
         //bufr.push(new Uint8Array(buf))
         //app.audio.decoder.decode(buf)     
+        console.log(buf)
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -352,6 +353,7 @@ require('domready')(re => {
       bus.on("sourcePeerCaptured", id => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
+          console.log(buf)
           decoder.decode(buf)
         })
       })
