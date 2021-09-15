@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source" : ":path.*",
-      "destination" : "128.0.0.1:11002:path*":
+      "destination" : "http://128.0.0.1:11002:path*":
     }
   ]
 }
