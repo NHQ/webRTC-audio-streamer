@@ -329,7 +329,7 @@ require('domready')(re => {
       }
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
-        //console.log('channel')//channelData)
+        console.log(channelData)
         let sam = sampler(app.audio.master, channelData)
         sam.connect(app.audio.master.destination)
         sam.start(0)
@@ -354,7 +354,7 @@ require('domready')(re => {
       bus.on("sourcePeerCaptured", id => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
-          console.log(buf)
+       //   console.log(buf)
           decoder.decode(buf)
         })
       })
