@@ -487,7 +487,7 @@ require('domready')(re => {
         }
       console.log(chosen)
       })
-      let t0 = setTimeut(e => {
+      let t0 = setTimout(e => {
       console.log(chosen)
         if(chosen) {
     //      this.hub.unsubscribe(mask)
