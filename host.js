@@ -172,7 +172,7 @@ require('domready')(re => {
 console.log(app)
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
-      if(app.session.broadcasting) app._log(buf.length)
+      //if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
         app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
@@ -349,7 +349,7 @@ console.log(app)
           let peer = app.network.connections[id]
           peer.on('data', buf => {
             buf = new Uint8Array(buf.buffer)
-            app._log(buf.length)
+        //    app._log(buf.length)
             try{
               decoder.ready.then(() => decoder.decode(buf), err => {
                 app._log(err.toString())
