@@ -349,6 +349,13 @@ require('domready')(re => {
         sink: sinkStream,
       }
 
+      bus.on("sourcePeerCaptured", id => {
+        let peer = app.network.connections[id]
+        peer.on('data', buf => {
+          decoder.decode(buf)
+        })
+      })
+
       log()
       app.audio.decoder = decoder
       app.audio.sinkStream = sinkStream
@@ -500,12 +507,9 @@ require('domready')(re => {
           //self.sourceCap(chosen)
           let peer = this.initConnect(chosen.peerId, true, mask)
           peer.once('connect', e => {
-            bus.emit('sourcePeerCaptured', peer)
+            bus.emit('sourcePeerCaptured', chosen.peerId)
             this.distance = chosen.distance + 1
             this.sourceStream = peer
-            peer.on('data', buf => {
-              app.audio.decoder.decode(buf)
-            })
             _log('Source Peer Captured.')
 
           })
