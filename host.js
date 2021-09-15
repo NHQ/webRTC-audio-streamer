@@ -411,6 +411,7 @@ require('domready')(re => {
     constructor(app, addr){
       const self = this
       //console.log(state, addr)
+      this.app = app
       this.hub = signalhub(addr, app.session.stream)
       this.channel = app.session.stream
       this.id = app.session.id
@@ -498,7 +499,7 @@ require('domready')(re => {
       var start = new Time
       offerings.on('data', offer => {
         offer = JSON.parse(offer)
-        app._log(offer)
+        self.app._log(offer)
         let score = (1 / offer.distance) * offer.duration
         if(score > best) {
           best = score //offer.distance
@@ -518,15 +519,15 @@ require('domready')(re => {
             bus.emit('sourcePeerCaptured', chosen.peerId)
             this.distance = chosen.distance + 1
             this.sourceStream = peer
-            app._log('Source Peer Captured.')
+            self.app._log('Source Peer Captured.')
 
           })
           peer.on('close', e => {
-            app._log('Source Peer Closed')
+            self.app._log('Source Peer Closed')
 
           })
         } else {
-          app._log('Err: No source peer found.')    
+          self.app._log('Err: No source peer found.')    
         }
       }, 13000)
       
@@ -586,7 +587,7 @@ require('domready')(re => {
     }
 
     seekable(msg){ 
-    app._log(msg)
+    this.app._log(msg)
       let self = this
       if(false) return // || Math.random() < 1 / Math.pow(self.distance, 2)) return
       else{
