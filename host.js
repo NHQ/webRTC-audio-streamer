@@ -179,7 +179,7 @@ console.log(app)
       btob(e.data, (err, buf) => {
       //if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
-        app.audio.decoder.decode(buf)     
+        //app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -348,9 +348,8 @@ console.log(app)
     wsm(decoder => {
       app.audio.decoder = decoder
     bus.on("sourcePeerCaptured", id => {
-        wsm(function(decoder){
           app._log('sinkCap')
-          app.audio.decoder = decoder
+      //    app.audio.decoder = decoder
           let peer = app.network.connections[id]
           peer.on('data', buf => {
             buf = new Uint8Array(buf.buffer)
@@ -364,7 +363,6 @@ console.log(app)
               
             }
           })
-        })
       })
 
 
