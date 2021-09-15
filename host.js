@@ -475,7 +475,7 @@ require('domready')(re => {
       var self = this 
       let mask = short().generate()
       let offerings = this.hub.subscribe(mask)
-      let best = 0//Infinity
+      var best = 0//Infinity
       var chosen
       var start = new Time
       offerings.on('data', offer => {
@@ -487,7 +487,7 @@ require('domready')(re => {
         }
       console.log(chosen)
       })
-      let t0 = setTimout(e => {
+      let t0 = setTimeout(e => {
       console.log(chosen)
         if(chosen) {
     //      this.hub.unsubscribe(mask)
