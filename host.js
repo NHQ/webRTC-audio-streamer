@@ -485,8 +485,10 @@ require('domready')(re => {
           best = score //offer.distance
           chosen = offer
         }
+      console.log(chosen)
       })
-      let t0 = setTimeout(e => {
+      let t0 = setTimeut(e => {
+      console.log(chosen)
         if(chosen) {
     //      this.hub.unsubscribe(mask)
           // do chosen
