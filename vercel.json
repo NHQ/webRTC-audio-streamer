@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source" : ":path.*",
-      "destination" : "http://128.0.0.1:11002:path*"
+      "source" : ":path*",
+      "destination" : "http://128.0.0.1:11001:path*"
     }
   ]
 }
