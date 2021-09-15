@@ -175,9 +175,9 @@ require('domready')(re => {
 
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
+      _log(buf.length)
         //bufr.push(new Uint8Array(buf))
-//        app.audio.decoder.decode(buf)     
-        console.log(buf)
+    //    app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -330,12 +330,9 @@ require('domready')(re => {
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
         //console.log(channelData)
-      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(new Blob([buf], {type:mime}))})
-      ui.tracks.appendChild(a)
-      var c= app.audio.master.createMediaElementSource(a)
-        //let sam = sampler(app.audio.master, channelData)
-        //sam.connect(app.audio.master.destination)
-        //sam.start(0)
+        let sam = sampler(app.audio.master, channelData)
+        sam.connect(app.audio.master.destination)
+        sam.start(0)
       }
 
       await decoder.ready
@@ -357,11 +354,8 @@ require('domready')(re => {
       bus.on("sourcePeerCaptured", id => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
-       //   console.log(buf)
-      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(new Blob([buf], {type:mime}))})
-      ui.tracks.appendChild(a)
-      var c= app.audio.master.createMediaElementSource(a)
-      //    decoder.decode(buf)
+          _log(buf.length)
+          decoder.decode(buf)
         })
       })
 
