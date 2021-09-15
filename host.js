@@ -43,7 +43,7 @@ require('domready')(re => {
   var app 
 
   window.store = store
-  store.clearAll();
+  //store.clearAll();
   runp([initState, initUI], (err, app)=>{
     app = app
 
