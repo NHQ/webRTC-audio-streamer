@@ -1,20 +1,8 @@
 {
-  "headers":[
+  "rewrites": [
     {
-      "source" : "/this/one",
-      "headers" : [
-        {
-          "key" : "Cross-Origin-Opener-Policy",
-          "value" : "same-origin"
-        },
-        {
-          "key":"Cross-Origin-Embedder-Policy",
-          "value":"require-corp"
-
-        }
-      ]
+      "source" : ":path.*",
+      "destination" : "128.0.0.1:11002:path*":
     }
-  ],
-  "redirects": [
   ]
 }
