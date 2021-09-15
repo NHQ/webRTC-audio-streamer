@@ -43,7 +43,11 @@ require('domready')(re => {
   var app 
 
   window.store = store
-  //store.clearAll();
+  if(!store.get('reset')) {
+     
+    store.clearAll();
+    store.set('reset', true)
+  }
   runp([initState, initUI], (err, app)=>{
     app = app
 
@@ -98,16 +102,17 @@ require('domready')(re => {
     bus.on('appStateChange', e =>{
       app.setGain(e[0], e[1])
     })
+    let hash = window.location.hash.slice(1)
     var session = store.get('session')
-    if(!session) session = {id: short().generate().split().reverse().join().slice(0,11)}
-    session.broadcasting = true
-    var q = qs.parse(window.location.search.slice(1))
-    if(q.stream) {
-      session.stream = q.stream
+    if(!session) {
+      session = {id: short().generate().split().reverse().join().slice(0,11)}
     }
-    else {
-      session.stream = session.id //stream || short().generate().split().reverse().join().slice(0,11)
+    session.broadcasting = false
+    if(hash.length){
+      session.stream = hash //short().generate().split().reverse().join().slice(0,11)
+      session.broadcasting = false
     }
+    else session.stream = session.id //short().generate().split().reverse().join().slice(0,11)
 
     app.session = session
   app._log = function(_id) { return e => {
@@ -208,7 +213,7 @@ console.log(app)
 
   function initUI(app, cb){
 
-    ui.livelink.innerText = `https://gabr.vercel.app?stream=${app.session.stream}`
+    ui.livelink.innerText = `https://gabr.vercel.app/#${app.session.stream}`
     ui.copybutton.onchange = e => {
       navigator.clipboard.writeText(ui.link.innerText)
     }
