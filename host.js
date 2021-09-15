@@ -144,9 +144,9 @@ require('domready')(re => {
     //audio.callmixer.connect(audio.monitor)
 
 
-    audio.mic.connect(audio.monitor)
+    //audio.mic.connect(audio.monitor)
     audio.call.connect(audio.monitor)
-    audio.track.connect(audio.monitor)
+    //audio.track.connect(audio.monitor)
     audio.monitor.connect(master.destination)
 
     audio.mic.connect(audio.broadcastmixer)
@@ -328,8 +328,9 @@ require('domready')(re => {
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
         //console.log(channelData)
+        app._log({samplesDecoded, sampleRate})
         let sam = sampler(app.audio.master, channelData)
-        sam.connect(app.audio.master.destination)
+        sam.connect(app.audio.call)
         sam.start(0)
       }
 
