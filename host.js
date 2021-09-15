@@ -60,9 +60,10 @@ require('domready')(re => {
           console.log(err, app)
           //app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
           if(app.session.broadcasting) {
-            app.network.sourceStream = app.audio.sourceStream
             app.network.distance = 1
+            app.network.sourceStream = app.audio.sourceStream
             app.network.seekable()
+            app.network.allowCalls(app.session.stream)
           
           }
           else app.network.sourceSeek()
@@ -174,8 +175,8 @@ require('domready')(re => {
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
         //bufr.push(new Uint8Array(buf))
-        app.audio.decoder.decode(buf)     
-        //app.network.broadcast(buf)
+        //app.audio.decoder.decode(buf)     
+        app.network.broadcast(buf)
         //strSrc.write(buf)
       })
 
@@ -212,7 +213,9 @@ require('domready')(re => {
     ui.copybutton.onchange = e => {
       navigator.clipboard.writeText(ui.link.innerText)
     }
-
+    ui.request.addEventListener('change', e => {
+      app.network.initCall(app.session.stream)
+    })
     ui.file.addEventListener('change', e => {
       console.log(e.target.files[0])
       var a = h('audio.invert', {controls: true, src : URL.createObjectURL(e.target.files[0])})
@@ -397,6 +400,7 @@ require('domready')(re => {
       this.id = app.session.id
       this.state = app.state
       this.connections = {}
+      this.hubs = {} 
       this.connecting = {}
       this.distance = -1
       this.offersOut = 0
@@ -428,12 +432,12 @@ require('domready')(re => {
       //delete this.connections[addr]
     }
 
-    disallowCalls(){
-      this.hub.unsubscribe('caller:'+this.id)
+    disallowCalls(id){
+      this.hub.unsubscribe('caller:'+id)
     }
 
-    allowCalls(){
-      let calls = this.hub.subscribe('caller:'+this.id)
+    allowCalls(id){
+      let calls = this.hub.subscribe('caller:'+id)
       calls.on('data', msg=>{
         msg=JSON.parse(msg)
         bus.emit('caller', msg)
@@ -515,7 +519,7 @@ require('domready')(re => {
     set sourceStream(stream){
       this._sourceStream = stream
       this.duration = new Time()
-      stream.pipe(this.sinkStream)
+      //stream.pipe(this.sinkStream)
       //stream.pipe(app.audio.sinkStream)
     }
 
@@ -528,41 +532,58 @@ require('domready')(re => {
     }
 
     isSeekWorthy(){
-      let r = this.offersOut < Math.pow(this.distance, 2) * this.maxConnections
-      this._seekable = r && this.maxConnections > Object.keys(this.connections).length  && this.sourceStream
+      let r = this.offersOut < this.maxConnections
+      r = r && this.maxConnections > Object.keys(this.connections).length  && this.sourceStream
+      this._seekable = !!r
+      if(r) {
+        this.sourcer = this.hub.subscribe('source')
+        p.on('data', this.seekable)
+      }
+      else this.hub.unsubscribe('source')
+
       return this._seekable
+    }
+
+    setsub(id){
+      if(this.hubs[id]) return this.hubs[id]
+      else this.hubs[id] = this.hub.subscribe(id)
+    }
+    getsub(id){
+      return this.hubs[id]
+    }
+
+    unsub(id){
+      if(this.hubs[id]) {
+        this.hub.unsubscribe(id) 
+        delete this.hubs[id] 
+      }
     }
 
     seekable(){ 
       const self = this
-      let ses = this.hub.subscribe('source')
-      _log(`Seekable? ${this.isSeekWorthy()}`)
-      ses.on('data', msg =>{
-        if (!self.isSeekWorthy()) return self.unseekable('source')
-        else if(Math.random() < 1 / Math.pow(self.distance, 2)) return
-        else{
-          self.offersOut += 1
-          setTimeout(e=>{
-            self.offersOut--
-            self.disinitConnect(msg.peerId, mask)
-          }, 1111)
-          let mask = short().generate()
-          let peer = self.init(msg.peerId, false, mask)
-          peer.once('connect', e =>{
-            this.peers[msg.peerId] = peer
-          })
-          peer.once('close', e =>{
-            delete this.peers[msg.peerId]
-          })
-          self.hub.broadcast(msg.peerId, JSON.stringify({
-            peerId: mask,
-            to: msg.peerId,
-            distance: self.distance,
-            duration: self.duration.sinceBeginNS()
-          }))
-        
-        }
-      })
+      if(Math.random() < 1 / Math.pow(self.distance, 2)) return
+      else{
+        self.offersOut += 1
+        setTimeout(e=>{
+          self.offersOut--
+          self.disinitConnect(msg.peerId, mask)
+        }, 1111*3)
+        let mask = short().generate()
+        let peer = self.init(msg.peerId, false, mask)
+        peer.once('connect', e =>{
+          this.peers[msg.peerId] = peer
+        })
+        peer.once('close', e =>{
+          delete this.peers[msg.peerId]
+          if(this.isSeekWorthy()) this.seekable()
+        })
+        self.hub.broadcast(msg.peerId, JSON.stringify({
+          peerId: mask,
+          to: msg.peerId,
+          distance: self.distance,
+          duration: self.duration.sinceBeginNS()
+        }))
+      }
     }
 
     disinitConnect(id, mask){
