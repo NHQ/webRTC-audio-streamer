@@ -169,12 +169,12 @@ require('domready')(re => {
 
     audio.broadcastencoder = new MediaRecorder(audio.broadcaststream.stream, {audioBitsPerSecond:40000, mimeType:mime}, workerOptions)
     audio.callencoder = new MediaRecorder(audio.callstream.stream, {audioBitsPerSecond:40000, mimeType:mime}, workerOptions)
-
+console.log(app)
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
       if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
-    //    app.audio.decoder.decode(buf)     
+        app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -184,14 +184,14 @@ require('domready')(re => {
     audio.callencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
         //bufr.push(new Uint8Array(buf))
-        app.audio.decoder.decode(buf)     
+        //app.audio.decoder.decode(buf)     
         //app.network.send(buf)
         //strSrc.write(buf)
       })
     })
 
     
-    audio.broadcastencoder.start(1000)
+    audio.broadcastencoder.start(20)
 
     autorun(()=>{
       if(app.update) {
@@ -208,7 +208,7 @@ require('domready')(re => {
 
   function initUI(app, cb){
 
-    ui.livelink.innerText = 'https://gabr.vercel.app?stream='+app.session.stream
+    ui.livelink.innerText = `https://gabr.vercel.app?stream=${app.session.stream}`
     ui.copybutton.onchange = e => {
       navigator.clipboard.writeText(ui.link.innerText)
     }
@@ -335,28 +335,15 @@ require('domready')(re => {
 
       await decoder.ready
 
-      /*
-      const sinkStream = thru((buf, enc, cb) => {
-        console.log('sink', buf)
-        decoder.decode(buf)
-        cb()
-      }, e =>{
-        console.log(e)
-      
-      })
-
-      var sinkState = {
-        sink: sinkStream,
-      }
-      */
       log(decoder)
-      //app.audio.sinkStream = sinkStream
+          console.log('WASM')
       
     }
 
+    wsm(decoder => {
+      app.audio.decoder = decoder
     bus.on("sourcePeerCaptured", id => {
         wsm(function(decoder){
-          console.log('WASM')
           app._log('sinkCap')
           app.audio.decoder = decoder
           let peer = app.network.connections[id]
@@ -377,6 +364,9 @@ require('domready')(re => {
 
 
       cb(null, app)
+       
+    })
+
     
 
   }
