@@ -61,8 +61,8 @@ require('domready')(re => {
           //app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
           if(app.session.broadcasting) {
             app.network.distance = 1
-            app.network.sourceStream = app.audio.sourceStream
-            app.network.seekable()
+//            app.network.sourceStream = app.audio.sourceStream
+            app.network.isSeekWorthy()
             app.network.allowCalls(app.session.stream)
           
           }
@@ -402,11 +402,12 @@ require('domready')(re => {
       this.connections = {}
       this.hubs = {} 
       this.connecting = {}
-      this.distance = -1
+      this.distance = 1
       this.offersOut = 0
       this.maxConnections = 4 // start low, test high, also helps spread early pcast testing
       this.duration = null // since-when
       this.channels = {}
+      this.duration = new Time
       this.sinkStream = thru(buf => {
         for(var n in this.peers){
           let p = this.peers[n]
@@ -505,7 +506,7 @@ require('domready')(re => {
         } else {
           _log('Err: No source peer found.')    
         }
-      }, 3000)
+      }, 13000)
       
 
       this.hub.broadcast('source', 
@@ -533,14 +534,17 @@ require('domready')(re => {
 
     isSeekWorthy(){
       let r = this.offersOut < this.maxConnections
-      r = r && this.maxConnections > Object.keys(this.connections).length  && this.sourceStream
-      this._seekable = !!r
-      if(r) {
+      let s = this.maxConnections > Object.keys(this.connections).length  
+      let q = r && s 
+      this._seekable = q
+      if(q) {
         this.sourcer = this.hub.subscribe('source')
-        p.on('data', this.seekable)
+        this.sourcer.on('data', msg => this.seekable(JSON.parse(msg)))
       }
-      else this.hub.unsubscribe('source')
-
+      else {
+        if(this.sourcer) this.sourcer.close()
+        
+      }
       return this._seekable
     }
 
@@ -559,36 +563,35 @@ require('domready')(re => {
       }
     }
 
-    seekable(){ 
-      const self = this
+    seekable(msg){ 
       if(Math.random() < 1 / Math.pow(self.distance, 2)) return
       else{
         self.offersOut += 1
         setTimeout(e=>{
-          self.offersOut--
-          self.disinitConnect(msg.peerId, mask)
+          this.offersOut--
+          //this.disnit(msg.peerId, mask)
         }, 1111*3)
         let mask = short().generate()
-        let peer = self.init(msg.peerId, false, mask)
+        let peer = this.initConnect(msg.peerId, false, mask)
         peer.once('connect', e =>{
           this.peers[msg.peerId] = peer
         })
         peer.once('close', e =>{
           delete this.peers[msg.peerId]
-          if(this.isSeekWorthy()) this.seekable()
+          this.isSeekWorthy()
         })
-        self.hub.broadcast(msg.peerId, JSON.stringify({
+        this.hub.broadcast(msg.peerId, JSON.stringify({
           peerId: mask,
           to: msg.peerId,
-          distance: self.distance,
-          duration: self.duration.sinceBeginNS()
+          distance: this.distance,
+          duration: this.duration.sinceBeginNS()
         }))
       }
     }
 
-    disinitConnect(id, mask){
-      delete this.connecting[id]
-      this.hub.unsubscribe(mask)
+    disnit(id, mask){
+      //delete this.connecting[id]
+      //this.hub.unsubscribe(mask)
     }
 
     initConnect(id, init, mask){
@@ -603,7 +606,7 @@ require('domready')(re => {
         var peer = this.connecting[msg.peerId]
         peer.signal(msg.signal)
         peer.once('connect', e => {
-          this.hub.unsubscribe(mask)
+          // close mask hub
         })
         //ui.callers.appendChild(h('div.caller', h('button.connect', `Connect to ${data.name || from}`, {onclick: _connect})))  
       })
