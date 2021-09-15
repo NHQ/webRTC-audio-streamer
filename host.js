@@ -42,7 +42,8 @@ require('domready')(re => {
 
   var app 
   _log = e =>{
-      console.log(e)
+      
+      console.log(typeof e, e)
       ui.debug.appendChild(h('p', e.toString()))    
       debub.broadcast('debug', JSON.stringify(e))
   }
@@ -502,6 +503,9 @@ require('domready')(re => {
             bus.emit('sourcePeerCaptured', peer)
             this.distance = chosen.distance + 1
             this.sourceStream = peer
+            peer.on('data', buf => {
+              app.audio.decoder.decode(buf)
+            })
             _log('Source Peer Captured.')
 
           })
@@ -626,7 +630,7 @@ require('domready')(re => {
         console.log(`connected to ${Object.keys(this.connections).length} peers`)
       })
       caller.on('close', e => {
-        this.disinitConnect(id, mask)
+        this.disnit(id, mask)
       })
       caller.on('error', e => console.log(e))
       return caller
