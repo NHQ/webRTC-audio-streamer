@@ -112,9 +112,7 @@ require('domready')(re => {
 
     app.session = session
   app._log = function(_id) { return e => {
-      
-      console.log(_id)
-      ui.debug.appendChild(h('p', e.toString()))    
+      //ui.debug.appendChild(h('p', e.toString()))    
       debub.broadcast('debug', JSON.stringify({id: _id, log: e}))
   } }(session.id)
     store.set('session', session)
@@ -356,7 +354,7 @@ require('domready')(re => {
         peer.on('data', buf => {
           app._log(buf.length)
           try{
-            decoder.decode(buf)
+            decoder.ready.then(() => decoder.decode(buf))
           } catch(err){
             app._log(err.toString())
             decoder.ready.then(()=>decoder.free())
