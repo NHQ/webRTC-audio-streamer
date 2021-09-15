@@ -401,6 +401,8 @@ require('domready')(re => {
       this.state = app.state
       this.connections = {}
       this.hubs = {} 
+      this.peers = {}
+      this.callers = {}
       this.connecting = {}
       this.distance = 1
       this.offersOut = 0
@@ -417,7 +419,7 @@ require('domready')(re => {
     }
 
     broadcast(buf){
-      for(var n in this.connections) this.connections[n].write(buf)
+      for(var n in this.peers) this.peers[n].write(buf)
     }
 
     send(buf){
@@ -569,6 +571,7 @@ require('domready')(re => {
 
     seekable(msg){ 
     _log(msg)
+      let self = this
       if(false) return // || Math.random() < 1 / Math.pow(self.distance, 2)) return
       else{
         self.offersOut += 1
@@ -579,11 +582,11 @@ require('domready')(re => {
         let mask = short().generate()
         let peer = this.initConnect(msg.peerId, false, mask)
         peer.once('connect', e =>{
-          this.peers[msg.peerId] = peer
+          self.peers[msg.peerId] = peer
         })
         peer.once('close', e =>{
-          delete this.peers[msg.peerId]
-          this.isSeekWorthy()
+          delete self.peers[msg.peerId]
+          self.isSeekWorthy()
         })
         this.hub.broadcast(msg.peerId, JSON.stringify({
           peerId: mask,
