@@ -41,17 +41,17 @@ require('domready')(re => {
   //var ret=debub.subscribe('return')
 
   var app 
-  _log = e =>{
-      
-      console.log(typeof e, e)
-      ui.debug.appendChild(h('p', e.toString()))    
-      debub.broadcast('debug', JSON.stringify(e))
-  }
 
   window.store = store
 
   runp([initState, initUI], (err, app)=>{
     app = app
+  _log = e =>{
+      
+      console.log(typeof e, e)
+      ui.debug.appendChild(h('p', e.toString()))    
+      debub.broadcast('debug', JSON.stringify({id: app.session.id, log: e}))
+  }
 
     ui.init.addEventListener('change', e => {
       _log('init')
@@ -175,7 +175,7 @@ require('domready')(re => {
 
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
-      _log(buf.length)
+      if(app.session.broadcasting) _log(buf.length)
         //bufr.push(new Uint8Array(buf))
     //    app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
@@ -358,7 +358,7 @@ require('domready')(re => {
           try{
             decoder.decode(buf)
           } catch(err){
-            _log(err)
+            _log(err.toString())
             decoder.ready.then(()=>decoder.free())
           }
         })
