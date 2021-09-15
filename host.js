@@ -107,7 +107,7 @@ require('domready')(re => {
     if(!session) {
       session = {id: short().generate().split().reverse().join().slice(0,11)}
     }
-    session.broadcasting = false
+    session.broadcasting =true 
     if(hash.length){
       session.stream = hash //short().generate().split().reverse().join().slice(0,11)
       session.broadcasting = false
