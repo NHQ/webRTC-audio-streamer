@@ -22,6 +22,7 @@ require('domready')(re => {
   const btob = require('blob-to-buffer')
   const thru = require('through2')
   var store = require('store')
+  var shajs = require('sha.js')
   const Time = require('../since-when')
   var jmic = require('../jsynth-mic/stream')
   var sampler = require('../jsynth-file-sample')
@@ -180,6 +181,7 @@ console.log(app)
       //if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
         //app.audio.decoder.decode(buf)     
+        app._log(new shajs('sha256').update(buf).digest('hex'))
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -196,7 +198,7 @@ console.log(app)
     })
 
     
-    audio.broadcastencoder.start(20)
+    audio.broadcastencoder.start(1000)
 
     autorun(()=>{
       if(app.update) {
