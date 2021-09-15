@@ -355,7 +355,12 @@ require('domready')(re => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
           _log(buf.length)
-          decoder.decode(buf)
+          try{
+            decoder.decode(buf)
+          } catch(err){
+            _log(err)
+            decoder.ready.then(()=>decoder.free())
+          }
         })
       })
 
