@@ -152,11 +152,11 @@ require('domready')(re => {
     audio.monitor.connect(master.destination)
 
     audio.mic.connect(audio.broadcastmixer)
-    audio.track.connect(audio.broadcastmixer)
-    audio.call.connect(audio.broadcastmixer)
+    //audio.track.connect(audio.broadcastmixer)
+    //audio.call.connect(audio.broadcastmixer)
 
-    audio.mic.connect(audio.callmixer)
-    audio.track.connect(audio.callmixer)
+    //audio.mic.connect(audio.callmixer)
+    //audio.track.connect(audio.callmixer)
 
     audio.broadcastmixer.connect(audio.broadcaststream)
     audio.callmixer.connect(audio.callstream)
@@ -170,14 +170,14 @@ require('domready')(re => {
       WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
     };
 
-    audio.broadcastencoder = new MediaRecorder(audio.broadcaststream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
-    audio.callencoder = new MediaRecorder(audio.callstream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+    audio.broadcastencoder = new MediaRecorder(audio.broadcaststream.stream, {audioBitsPerSecond:40000, mimeType:mime}, workerOptions)
+    audio.callencoder = new MediaRecorder(audio.callstream.stream, {audioBitsPerSecond:40000, mimeType:mime}, workerOptions)
 
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
         //bufr.push(new Uint8Array(buf))
-        //app.audio.decoder.decode(buf)     
-//        console.log(buf)
+//        app.audio.decoder.decode(buf)     
+        console.log(buf)
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -194,7 +194,7 @@ require('domready')(re => {
     })
 
     
-    audio.broadcastencoder.start(20)
+    audio.broadcastencoder.start(1000)
 
     autorun(()=>{
       if(app.update) {
@@ -337,6 +337,7 @@ require('domready')(re => {
 
       await decoder.ready
 
+      /*
       const sinkStream = thru((buf, enc, cb) => {
         console.log('sink', buf)
         decoder.decode(buf)
@@ -349,18 +350,18 @@ require('domready')(re => {
       var sinkState = {
         sink: sinkStream,
       }
-
+      */
       bus.on("sourcePeerCaptured", id => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
-//          console.log(buf)
+          console.log(buf)
           decoder.decode(buf)
         })
       })
 
       log()
       app.audio.decoder = decoder
-      app.audio.sinkStream = sinkStream
+      //app.audio.sinkStream = sinkStream
       _log('sinkCap')
       cb(null, app)
       
