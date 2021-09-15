@@ -84,7 +84,7 @@ require('domready')(re => {
     
       constructor(){
         this.mic = 1/2
-        this.monitor = 1/2
+        this.monitor = 0
         this.call = 1/2
         this.track = 1/2
         this.quality = 64000
@@ -479,6 +479,7 @@ require('domready')(re => {
       var chosen
       var start = new Time
       offerings.on('data', offer => {
+        _log(offer)
         let score = (1 / offer.distance) * offer.duration
         if(score > best) {
           best = score //offer.distance
@@ -487,7 +488,7 @@ require('domready')(re => {
       })
       let t0 = setTimeout(e => {
         if(chosen) {
-          this.hub.unsubscribe(mask)
+    //      this.hub.unsubscribe(mask)
           // do chosen
           bus.emit('sourcePeerIdCaptured', chosen.peerId)
           //self.sourceCap(chosen)
@@ -564,7 +565,8 @@ require('domready')(re => {
     }
 
     seekable(msg){ 
-      if(Math.random() < 1 / Math.pow(self.distance, 2)) return
+    _log(msg)
+      if(false) return // || Math.random() < 1 / Math.pow(self.distance, 2)) return
       else{
         self.offersOut += 1
         setTimeout(e=>{
