@@ -46,15 +46,9 @@ require('domready')(re => {
 
   runp([initState, initUI], (err, app)=>{
     app = app
-  _log = e =>{
-      
-      console.log(typeof e, e)
-      ui.debug.appendChild(h('p', e.toString()))    
-      debub.broadcast('debug', JSON.stringify({id: app.session.id, log: e}))
-  }
 
     ui.init.addEventListener('change', e => {
-      _log('init')
+      app._log('init')
 
       try{
         runp([captureSource, captureSink, captureNetwork, initAudio, initCast(app)].reverse(), (err, app)=>{
@@ -69,7 +63,7 @@ require('domready')(re => {
           }
           else app.network.sourceSeek()
       })} catch (err){
-        _log(err)
+        app._log(err)
       }
     })
     
@@ -117,6 +111,12 @@ require('domready')(re => {
     }
 
     app.session = session
+  app._log = function(_id) { return e => {
+      
+      console.log(_id)
+      ui.debug.appendChild(h('p', e.toString()))    
+      debub.broadcast('debug', JSON.stringify({id: _id, log: e}))
+  } }(session.id)
     store.set('session', session)
     console.log(app)
     cb(null, app)
@@ -175,7 +175,7 @@ require('domready')(re => {
 
     audio.broadcastencoder.addEventListener('dataavailable', e => {
       btob(e.data, (err, buf) => {
-      if(app.session.broadcasting) _log(buf.length)
+      if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
     //    app.audio.decoder.decode(buf)     
         app.network.broadcast(buf)
@@ -202,7 +202,7 @@ require('domready')(re => {
       } 
     })
 
-    _log(`mediaRecorder added? ${(!!audio.broadcastencoder)}`)
+    app._log(`mediaRecorder added? ${(!!audio.broadcastencoder)}`)
 
     app.audio = audio
     master.resume()
@@ -260,14 +260,14 @@ require('domready')(re => {
   function initCast(app){
   
     return function(cb){
-      _log('stateInit')
+      app._log('stateInit')
       cb(null, app)
     
     }
   }
   function captureNetwork(app, cb) {
     var network = new Network(app, argv.protocol + '://' + argv.host + ':' + argv.port)
-    _log('netCap')
+    app._log('netCap')
     app.network = network
 
     cb(null, app)
@@ -278,8 +278,8 @@ require('domready')(re => {
     
     if(true || app.session.broadcasting){
       addMedia((err, stream) =>{
-        _log(`mediaStream added? ${(!!stream)}`)
-        _log(`mediaStream error? ${(err)}`)
+        app._log(`mediaStream added? ${(!!stream)}`)
+        app._log(`mediaStream error? ${(err)}`)
 
         console.log(err)
         console.log(stream)
@@ -306,7 +306,7 @@ require('domready')(re => {
         //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
         // Delete the encoder when finished with it (Emscripten does not automatically call C++ object destructors)
         //encoder.delete();
-       _log('sourceCap')
+       app._log('sourceCap')
         cb(err, app)
         
       
@@ -354,11 +354,11 @@ require('domready')(re => {
       bus.on("sourcePeerCaptured", id => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
-          _log(buf.length)
+          app._log(buf.length)
           try{
             decoder.decode(buf)
           } catch(err){
-            _log(err.toString())
+            app._log(err.toString())
             decoder.ready.then(()=>decoder.free())
           }
         })
@@ -367,7 +367,7 @@ require('domready')(re => {
       log()
       app.audio.decoder = decoder
       //app.audio.sinkStream = sinkStream
-      _log('sinkCap')
+      app._log('sinkCap')
       cb(null, app)
       
     }
@@ -498,7 +498,7 @@ require('domready')(re => {
       var start = new Time
       offerings.on('data', offer => {
         offer = JSON.parse(offer)
-        _log(offer)
+        app._log(offer)
         let score = (1 / offer.distance) * offer.duration
         if(score > best) {
           best = score //offer.distance
@@ -518,15 +518,15 @@ require('domready')(re => {
             bus.emit('sourcePeerCaptured', chosen.peerId)
             this.distance = chosen.distance + 1
             this.sourceStream = peer
-            _log('Source Peer Captured.')
+            app._log('Source Peer Captured.')
 
           })
           peer.on('close', e => {
-            _log('Source Peer Closed')
+            app._log('Source Peer Closed')
 
           })
         } else {
-          _log('Err: No source peer found.')    
+          app._log('Err: No source peer found.')    
         }
       }, 13000)
       
@@ -586,7 +586,7 @@ require('domready')(re => {
     }
 
     seekable(msg){ 
-    _log(msg)
+    app._log(msg)
       let self = this
       if(false) return // || Math.random() < 1 / Math.pow(self.distance, 2)) return
       else{
@@ -653,7 +653,6 @@ require('domready')(re => {
   function addMedia(cb, audio=true, video=false){
     var gam = require('getusermedia')
     // Web worker and .wasm configuration. Note: This is NOT a part of W3C standard.
-    _log(`getUserMedia? ${!!gam}`)
     gam({video, audio}, function(err, stream){
       //console.log(stream.getAudioTracks())
 
