@@ -104,10 +104,9 @@ require('domready')(re => {
     var q = qs.parse(window.location.search.slice(1))
     if(q.stream) {
       session.stream = q.stream
-      session.broadcasting = false 
     }
     else {
-      session.stream = session.stream || short().generate().split().reverse().join().slice(0,11)
+      session.stream = session.id //stream || short().generate().split().reverse().join().slice(0,11)
     }
 
     app.session = session
@@ -362,11 +361,11 @@ require('domready')(re => {
           app.audio.decoder = decoder
           let peer = app.network.connections[id]
           peer.on('data', buf => {
+            buf = new Uint8Array(buf.buffer)
             app._log(buf.length)
             try{
               decoder.ready.then(() => decoder.decode(buf), err => {
                 app._log(err.toString())
-                decoder.ready.then(()=>decoder.free())
               })
             } catch(err){
                 app._log(err.toString())
