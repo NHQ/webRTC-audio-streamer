@@ -58,7 +58,7 @@ require('domready')(re => {
       try{
         runp([captureSource, captureSink, captureNetwork, initAudio, initCast(app)].reverse(), (err, app)=>{
           console.log(err, app)
-     //     app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
+          //app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
           if(app.session.broadcasting) {
             app.network.sourceStream = app.audio.sourceStream
             app.network.distance = 1
@@ -122,29 +122,84 @@ require('domready')(re => {
 
   function initAudio(app, cb){
     const audio = {}
+    var OpusMediaRecorder = require('opus-media-recorder') 
+    window.MediaRecorder = OpusMediaRecorder;
     master = new WebAudioContext({sampleRate: 48000})
     audio.master = master
-    audio.mixer = master.createChannelMerger(2)
-    audio.restream = master.createMediaStreamDestination()
+    audio.broadcastmixer = master.createChannelMerger(2)
+    audio.callmixer = master.createChannelMerger(2)
+    audio.broadcaststream = master.createMediaStreamDestination()
+    audio.callstream = master.createMediaStreamDestination()
     audio.monitor = master.createGain()
     audio.mic = master.createGain()
     audio.call = master.createGain()
+    audio.trackmixer = master.createChannelMerger(2)
     audio.track = master.createGain()
+    audio.trackmixer.connect(audio.track)
+
+    audio.broadcastmixer.connect(audio.broadcaststream)
+    //audio.broadcastmixer.connect(audio.monitor)
+
+    audio.callmixer.connect(audio.callstream)
+    //audio.callmixer.connect(audio.monitor)
 
 
-    audio.mixer.connect(audio.restream)
-    audio.mixer.connect(audio.monitor)
-
+    audio.mic.connect(audio.monitor)
+    audio.call.connect(audio.monitor)
+    audio.track.connect(audio.monitor)
     audio.monitor.connect(master.destination)
-    audio.mic.connect(audio.mixer)
-    audio.call.connect(audio.mixer)
-    audio.track.connect(audio.mixer)
+
+    audio.mic.connect(audio.broadcastmixer)
+    audio.track.connect(audio.broadcastmixer)
+    audio.call.connect(audio.broadcastmixer)
+
+    audio.mic.connect(audio.callmixer)
+    audio.track.connect(audio.callmixer)
+
+    audio.broadcastmixer.connect(audio.broadcaststream)
+    audio.callmixer.connect(audio.callstream)
+    
+    const workerOptions = {
+      encoderWorkerFactory: function () {
+        // UMD should be used if you don't use a web worker bundler for this.
+        return new Worker(tob(fs.readFileSync('./public/static/encoderWorker.umd.js')))
+      },
+      OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
+      WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
+    };
+
+    audio.broadcastencoder = new MediaRecorder(audio.broadcaststream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+    audio.callencoder = new MediaRecorder(audio.callstream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
+
+    audio.broadcastencoder.addEventListener('dataavailable', e => {
+      btob(e.data, (err, buf) => {
+        //bufr.push(new Uint8Array(buf))
+        app.audio.decoder.decode(buf)     
+        //app.network.broadcast(buf)
+        //strSrc.write(buf)
+      })
+
+    })
+
+    audio.callencoder.addEventListener('dataavailable', e => {
+      btob(e.data, (err, buf) => {
+        //bufr.push(new Uint8Array(buf))
+        app.audio.decoder.decode(buf)     
+        //app.network.send(buf)
+        //strSrc.write(buf)
+      })
+    })
+
+    
+    audio.broadcastencoder.start(1000)
 
     autorun(()=>{
       if(app.update) {
         audio[app.update[0]].gain.value = Math.max(0, app.update[1])//.monitor
       } 
     })
+
+    _log(`mediaRecorder added? ${(!!audio.broadcastencoder)}`)
 
     app.audio = audio
     master.resume()
@@ -164,7 +219,7 @@ require('domready')(re => {
       ui.tracks.appendChild(a)
       var c= app.audio.master.createMediaElementSource(a)
       console.log(a)
-      c.connect(app.audio.track)
+      c.connect(app.audio.trackmixer)
       btob(e.target.files[0], (err, buf) => {
         sampler(app.audio.master, buf.buffer, (err, node) =>{
           //node.connect(app.audio.master.destination)
@@ -222,51 +277,31 @@ require('domready')(re => {
         _log(`mediaStream error? ${(err)}`)
 
         console.log(err)
-        const workerOptions = {
-          encoderWorkerFactory: function () {
-            // UMD should be used if you don't use a web worker bundler for this.
-            return new Worker(tob(fs.readFileSync('./public/static/encoderWorker.umd.js')))
-          },
-          OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
-          WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
-        };
         console.log(stream)
 
         const mic = app.audio.master.createMediaStreamSource(stream) 
-        const mixer = app.audio.mixer 
-        const restream = app.audio.restream 
-        
-        
         mic.connect(app.audio.mic)
-        const recr = new MediaRecorder(restream.stream, {audioBitsPerSecond:64000, mimeType:mime}, workerOptions)
-        _log(`mediaRecorder added? ${(!!recr)}`)
+
         app.audio.mediastream = stream
         app.audio.micnode = mic
+    
+        /*
         var bufr = []
         app.audio.buffer = bufr
-        const strSrc = thru()
+        const strSrc = thru((b, r, cb)=>{
+            console.log('source', b)
+          cb(null, b)
+        },e=>{
+          console.log(e)
+        } )
         app.audio.sourceStream = strSrc
+        */
         // do same for host monitoring:
         //for(var smith in phonebook) mediaStream.pipe(phonebook[smith]) 
         //ui.monitor.srcObject = stream// = URL.createObjectURL(stream)      
         // Delete the encoder when finished with it (Emscripten does not automatically call C++ object destructors)
         //encoder.delete();
-        recr.addEventListener('dataavailable', e => {
-          btob(e.data, (err, buf) => {
-            bufr.push(new Uint8Array(buf))
-            strSrc.write(buf)
-            //for(var smith in state.network.phonebook) state.network.phonebook[smith].write(buf)
-          })
-        })
-
-        var sourceState = {
-          source: strSrc,
-          buffers: bufr // switch to jbuffers
-        }
-
        _log('sourceCap')
-    
-        recr.start(20)
         cb(err, app)
         
       
@@ -289,6 +324,7 @@ require('domready')(re => {
       }
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
+        //console.log('channel')//channelData)
         let sam = sampler(app.audio.master, channelData)
         sam.connect(app.audio.master.destination)
         sam.start(0)
@@ -297,15 +333,20 @@ require('domready')(re => {
       await decoder.ready
 
       const sinkStream = thru((buf, enc, cb) => {
+        console.log('sink', buf)
         decoder.decode(buf)
         cb()
-      }, e =>{})
+      }, e =>{
+        console.log(e)
+      
+      })
 
       var sinkState = {
         sink: sinkStream,
       }
 
       log()
+      app.audio.decoder = decoder
       app.audio.sinkStream = sinkStream
       _log('sinkCap')
       cb(null, app)
@@ -370,6 +411,13 @@ require('domready')(re => {
       }, function close(){})
     }
 
+    broadcast(buf){
+      for(var n in this.connections) this.connections[n].write(buf)
+    }
+
+    send(buf){
+      for(var n in this.callers) this.callers[n].write(buf)
+    }
 
     log(){
       console.log.apply(this, arguments)
@@ -468,7 +516,7 @@ require('domready')(re => {
       this._sourceStream = stream
       this.duration = new Time()
       stream.pipe(this.sinkStream)
-      stream.pipe(app.audio.sinkStream)
+      //stream.pipe(app.audio.sinkStream)
     }
 
     get sourceStream(){
@@ -555,9 +603,7 @@ require('domready')(re => {
   }
 
   function addMedia(cb, audio=true, video=false){
-    var OpusMediaRecorder = require('opus-media-recorder') 
     var gam = require('getusermedia')
-    window.MediaRecorder = OpusMediaRecorder;
     // Web worker and .wasm configuration. Note: This is NOT a part of W3C standard.
     _log(`getUserMedia? ${!!gam}`)
     gam({video, audio}, function(err, stream){
