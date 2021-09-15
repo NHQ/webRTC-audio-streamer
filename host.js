@@ -329,10 +329,13 @@ require('domready')(re => {
       }
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
-        console.log(channelData)
-        let sam = sampler(app.audio.master, channelData)
-        sam.connect(app.audio.master.destination)
-        sam.start(0)
+        //console.log(channelData)
+      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(new Blob([buf], {type:mime}))})
+      ui.tracks.appendChild(a)
+      var c= app.audio.master.createMediaElementSource(a)
+        //let sam = sampler(app.audio.master, channelData)
+        //sam.connect(app.audio.master.destination)
+        //sam.start(0)
       }
 
       await decoder.ready
@@ -355,7 +358,10 @@ require('domready')(re => {
         let peer = app.network.connections[id]
         peer.on('data', buf => {
        //   console.log(buf)
-          decoder.decode(buf)
+      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(new Blob([buf], {type:mime}))})
+      ui.tracks.appendChild(a)
+      var c= app.audio.master.createMediaElementSource(a)
+      //    decoder.decode(buf)
         })
       })
 
@@ -374,8 +380,8 @@ require('domready')(re => {
 
 
 
-  function tob(buf){
-    return URL.createObjectURL(new Blob([new Buffer(buf).buffer], {type: 'application/wasm'}))
+  function tob(buf, type="application/wasm"){
+    return URL.createObjectURL(new Blob([new Buffer(buf).buffer], {type}))
   }
    
   var peers = {}
