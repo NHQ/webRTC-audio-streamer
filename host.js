@@ -349,32 +349,35 @@ require('domready')(re => {
         sink: sinkStream,
       }
       */
-      bus.on("sourcePeerCaptured", id => {
-        let peer = app.network.connections[id]
-        peer.on('data', buf => {
-          app._log(buf.length)
-          try{
-            decoder.ready.then(() => decoder.decode(buf), err => {
-              app._log(err.toString())
-              decoder.ready.then(()=>decoder.free())
-            })
-          } catch(err){
-              app._log(err.toString())
-            
-          }
-        })
-      })
-
-      log()
-      app.audio.decoder = decoder
+      log(decoder)
       //app.audio.sinkStream = sinkStream
-      app._log('sinkCap')
-      cb(null, app)
       
     }
 
+    bus.on("sourcePeerCaptured", id => {
+        wsm(function(decoder){
+          console.log('WASM')
+          app._log('sinkCap')
+          app.audio.decoder = decoder
+          let peer = app.network.connections[id]
+          peer.on('data', buf => {
+            app._log(buf.length)
+            try{
+              decoder.ready.then(() => decoder.decode(buf), err => {
+                app._log(err.toString())
+                decoder.ready.then(()=>decoder.free())
+              })
+            } catch(err){
+                app._log(err.toString())
+              
+            }
+          })
+        })
+      })
 
-    wsm(function(){console.log('WASM')})
+
+      cb(null, app)
+    
 
   }
 
