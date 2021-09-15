@@ -479,6 +479,7 @@ require('domready')(re => {
       var chosen
       var start = new Time
       offerings.on('data', offer => {
+        offer = JSON.parse(offer)
         _log(offer)
         let score = (1 / offer.distance) * offer.duration
         if(score > best) {
