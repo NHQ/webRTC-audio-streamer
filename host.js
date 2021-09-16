@@ -55,7 +55,7 @@ require('domready')(re => {
           if(app.session.broadcasting) {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
-            setInterval(e=>app.network.isSeekWorth(), 1000)
+            setInterval(e=>app.network.isSeekWorthy(), 1000)
             app.network.allowCalls(app.session.stream)
             setTimeout(e => app.audio.start(), 1000)
              
