@@ -4,7 +4,8 @@ require('domready')(re => {
   var master 
   var h = require('hyperscript')
   var ui = require('getids')()
-  var bus = require('./sharedEmitter')
+  var Emitter = require('events')//.EventEmitter //require('./sharedEmitter')
+  var bus = new Emitter()
   bus.once('iframeLoaded', e => {
     console.log(e)
     bus.emit('pong', {goat: 1})
@@ -119,7 +120,7 @@ require('domready')(re => {
   app._log = function(_id) { return e => {
       //ui.debug.appendChild(h('p', e.toString()))    
       debub.broadcast('debug', JSON.stringify({id: _id, log: e}))
-  } }(session.id)
+  } }(session.broadcasting ? session.id : session.stream)
     store.set('session', session)
     console.log(app)
     cb(null, app)
@@ -181,7 +182,7 @@ console.log(app)
       //if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
         //app.audio.decoder.decode(buf)     
-        app._log(new shajs('sha256').update(buf).digest('hex'))
+        if(app.session.broadcasting) app._log(new shajs('sha256').update(buf).digest('hex'))
         app.network.broadcast(buf)
         //strSrc.write(buf)
       })
@@ -334,7 +335,7 @@ console.log(app)
 
       function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
         //console.log(channelData)
-        app._log({samplesDecoded, sampleRate})
+        console.log({samplesDecoded, sampleRate})
         let sam = sampler(app.audio.master, channelData)
         sam.connect(app.audio.call)
         sam.start(0)
@@ -355,6 +356,7 @@ console.log(app)
           let peer = app.network.connections[id]
           peer.on('data', buf => {
             buf = new Uint8Array(buf.buffer)
+        app._log(new shajs('sha256').update(buf).digest('hex'))
         //    app._log(buf.length)
             try{
               decoder.ready.then(() => decoder.decode(buf), err => {
