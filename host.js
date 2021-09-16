@@ -119,7 +119,8 @@ require('domready')(re => {
     app.session = session
   app._log = function(_id) { return e => {
       //ui.debug.appendChild(h('p', e.toString()))    
-      debub.broadcast('debug', JSON.stringify({id: _id, log: e}))
+      //app.network.broadcast('debug', JSON.stringify({id: _id, log: e}))
+      console.log(e)
   } }(session.broadcasting ? session.id : session.stream)
     store.set('session', session)
     console.log(app)
@@ -182,8 +183,13 @@ console.log(app)
       //if(app.session.broadcasting) app._log(buf.length)
         //bufr.push(new Uint8Array(buf))
         //app.audio.decoder.decode(buf)     
-        if(app.session.broadcasting) app._log(new shajs('sha256').update(buf).digest('hex'))
         app.network.broadcast(buf)
+        if(app.session.broadcasting) {
+          app._log(new shajs('sha256').update(buf).digest('hex'))
+          let chub = Buffer.from(buf).toString('base64')
+ //         console.log(chub)
+//          app.network.hub.broadcast(app.session.stream + 'xxx', chub) 
+        }
         //strSrc.write(buf)
       })
 
@@ -339,6 +345,7 @@ console.log(app)
         let sam = sampler(app.audio.master, channelData)
         sam.connect(app.audio.call)
         sam.start(0)
+        dexode()
       }
 
       await decoder.ready
@@ -348,31 +355,43 @@ console.log(app)
       
     }
 
-    wsm(decoder => {
-      app.audio.decoder = decoder
+    function dexode(){
+      app.audio.decoder.decode(app.bufs.shift())
+    }
+
+
     bus.on("sourcePeerCaptured", id => {
+    wsm(decoder => {
+      app.network.hub.subscribe(app.session.stream +'xxx').on('data', bug => {
+        console.log(bug, bug.length)
+        let buf = new Uint8Array(Buffer.from(bug, 'base64').buffer)
+        app._log(new shajs('sha256').update(buf).digest('hex'))
+        decoder.decode(buf)
+      })
+      
+      console.log(decoder)
+      app.audio.decoder = decoder
           app._log('sinkCap')
-      //    app.audio.decoder = decoder
+          app.bufs = []
           let peer = app.network.connections[id]
           peer.on('data', buf => {
-            buf = new Uint8Array(buf.buffer)
-        app._log(new shajs('sha256').update(buf).digest('hex'))
+            let ab = new Uint8Array(Buffer.from(buf).buffer)
+          //let chub = Buffer.from(ab).toString('base64')
+          //console.log(chub)
+            app.bufs.push(ab)
+        app._log(new shajs('sha256').update(ab).digest('hex'))
         //    app._log(buf.length)
-            try{
-              decoder.ready.then(() => decoder.decode(buf), err => {
-                app._log(err.toString())
-              })
-            } catch(err){
-                app._log(err.toString())
-              
-            }
+            setTimeout(e => {
+                dexode()
+          }, 1000)
           })
+     
       })
 
 
-      cb(null, app)
        
     })
+      cb(null, app)
 
     
 
