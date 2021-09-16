@@ -64,6 +64,7 @@ require('domready')(re => {
             
             app.network.sourceSeek()
             bus.on('sourcePeerCaptured', id => {
+              //app.audio.start(1000)
               app.network.connections[id].on('data', buf => app.audio.send('sinkBuffer', buf))
             })
           }
