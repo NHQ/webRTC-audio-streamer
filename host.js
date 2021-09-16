@@ -55,7 +55,7 @@ require('domready')(re => {
           if(app.session.broadcasting) {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
-            app.network.isSeekWorthy()
+            setInteval(e=>app.network.isSeekWorth(), 1000)
             app.network.allowCalls(app.session.stream)
             setTimeout(e => app.audio.start(), 1000)
              
@@ -338,7 +338,7 @@ require('domready')(re => {
         } else {
           self.app._log('Err: No source peer found.')    
         }
-      }, 13000)
+      }, 33000)
       
 
       this.hub.broadcast('source', 
