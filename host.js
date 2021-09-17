@@ -129,7 +129,7 @@ require('domready')(re => {
 
   function initUI(app, cb){
 
-    ui.livelink.innerText = `https://gabr.vercel.app/#${app.session.stream}`
+    ui.livelink.innerText = `${window.location.href}#${app.session.stream}`
     ui.copybutton.onchange = e => {
       navigator.clipboard.writeText(ui.link.innerText)
     }
