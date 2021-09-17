@@ -55,13 +55,13 @@ require('domready')(re => {
           if(app.session.broadcasting) {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
-            setInterval(e=>app.network.isSeekWorthy(), 1000)
-            app.network.allowCalls(app.session.stream)
+           app.network.isSeekWorthy()
+            //app.network.allowCalls(app.session.stream)
             setTimeout(e => app.audio.start(), 1000)
              
           }
           else {
-            
+            app.audio.send('resume') 
             app.network.sourceSeek()
             bus.on('sourcePeerCaptured', id => {
               //app.audio.start(1000)

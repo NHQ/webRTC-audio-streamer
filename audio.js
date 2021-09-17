@@ -36,6 +36,9 @@ module.exports = function(self){
       self.addEventListener('message', msg =>{
       //console.log(msg)
         switch (msg.data.type){
+          case 'resume':
+            audio.master.resume()
+          break;
           case 'startBroadcast':
             audio.master.resume()
             audio.broadcastencoder.start(1000)
@@ -104,11 +107,13 @@ module.exports = function(self){
       audio.broadcastencoder.addEventListener('dataavailable', e => {
         btob(e.data, (err, buf) => {
             console.log(new shajs('sha256').update(buf).digest('hex'))
-            window.parent.postMessage({
-              type: 'broadcastSourceBuffer', 
-              data: buf
-            })
-            audio.decoder.decode(buf)
+            if(buf.length) {
+              window.parent.postMessage({
+                type: 'broadcastSourceBuffer', 
+                data: buf
+              })
+            }
+            //audio.decoder.decode(buf)
             //let chub = Buffer.from(buf).toString('base64')
    //         console.log(chub)
 
