@@ -23,7 +23,7 @@ module.exports = function(self){
     var jmic = require('../jsynth-mic/stream')
     var sampler = require('../jsynth-file-sample')
     var media 
-    var interval = 1000
+    var interval = 20
     var mime = 'audio/ogg;codecs=opus'
     var runp =require('run-waterfall')
     var {OggOpusDecoder} = require('ogg-opus-decoder')
