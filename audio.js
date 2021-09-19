@@ -119,7 +119,7 @@ this.mic.gain.value = 2
         this.createDecoder(this.call, ({decoder}) => {
           this.sourcedecoder = decoder
          })
-        this.mic.connec(master.destination) 
+        this.mic.connect(master.destination) 
         if(broadcasting){
           this.mic.connect(this.mixer)
           this.call.connect(this.mixer)
