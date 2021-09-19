@@ -32,6 +32,7 @@ module.exports = function(self){
 
     broadcasting = !self.parent.location.hash.length
     var bps = 64000
+    try{
     runp([getApp], (err, audio) =>{
       console.log(err, audio)
       self.parent.postMessage({type: 'debug', data: err.toString()})
@@ -77,7 +78,10 @@ module.exports = function(self){
           
         }
       })
-    })
+    })} catch(err){
+      self.parent.postMessage({type: 'debug', data: err.toString()})
+    
+    }
 
       function getApp(cb,broadcasting){
 
