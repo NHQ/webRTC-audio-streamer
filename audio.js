@@ -50,7 +50,7 @@ module.exports = function(self){
             audio.captureMic((err, mic)=>{
       self.parent.postMessage({type: 'debug', data: err})
       self.parent.postMessage({type: 'debug', data: !!mic})
-              //let {encoder, node}  = audio.createEncoder('record')
+              /let {encoder, node}  = audio.createEncoder('record')
               //encoder.start(interval)
             })
             //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
@@ -104,6 +104,7 @@ module.exports = function(self){
         this.track = master.createGain()
         this.source = master.createGain()
 
+this.mic.gain.value = 2
         this.mixer.connect(this.splitter)
 
         this.monitormix.connect(this.monitor)
