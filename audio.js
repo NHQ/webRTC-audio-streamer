@@ -50,6 +50,7 @@ module.exports = function(self){
             audio.captureMic((err, mic)=>{
       self.parent.postMessage({type: 'debug', data: err})
       self.parent.postMessage({type: 'debug', data: !!mic})
+            audio.master.resume()
               //let {encoder, node}  = audio.createEncoder('record')
               //encoder.start(interval)
             })
