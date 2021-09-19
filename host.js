@@ -58,7 +58,7 @@ require('domready')(re => {
 
       try{
         initAudio(app, (err, app)=>{
-          console.log(err, app)
+          app._log(err)
           //app.audio.sourceStream.pipe(app.audio.sinkStream) // heh
           if(app.session.broadcasting) {
             app.network.distance = 1
@@ -200,6 +200,9 @@ require('domready')(re => {
       //audio.contentWindow.postMessage({type: 'sinkBuffer', data: msg.data.data})
       
       var t = msg.data.type 
+      if(t == 'debug'){
+        app._log(msg.data.data)
+      }
       if(t == 'broadcastSourceBuffer') {
         if(msg.data.id == 'record'){}
         else app.network.peers[msg.data.id].write(msg.data.data)
