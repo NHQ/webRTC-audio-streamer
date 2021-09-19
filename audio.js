@@ -35,7 +35,7 @@ module.exports = function(self){
     try{
     runp([getApp], (err, audio) =>{
       console.log(err, audio)
-      self.parent.postMessage({type: 'debug', data: err.toString()})
+      self.parent.postMessage({type: 'debug', data: err})
       self.addEventListener('message', msg =>{
       //console.log(msg)
         switch (msg.data.type){
@@ -48,7 +48,8 @@ module.exports = function(self){
           case 'startBroadcast':
             audio.master.resume()
             audio.captureMic((err, mic)=>{
-      self.parent.postMessage({type: 'debug', data: err.toString()})
+      self.parent.postMessage({type: 'debug', data: err})
+      self.parent.postMessage({type: 'debug', data: !!mic})
               let {encoder, node}  = audio.createEncoder('record')
               encoder.start(interval)
             })
@@ -146,7 +147,7 @@ module.exports = function(self){
           self.mediastream = stream
           self.micnode = mic
       
-          cb(err, mic)
+          cb(err, stream)
           
         
         })
