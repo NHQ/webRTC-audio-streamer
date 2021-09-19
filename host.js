@@ -112,6 +112,7 @@ require('domready')(re => {
     const app = new App
     bus.on('appStateChange', e =>{
       app.setGain(e[0], e[1])
+      app.audio.send('param', e[1], e[0])
     })
     let hash = window.location.hash.slice(1)
     var session = store.get('session')
@@ -347,7 +348,7 @@ require('domready')(re => {
             this.distance = chosen.distance + 1
             this.sourceStream = peer
             self.app._log('Source Peer Captured.')
-
+            self.isSeekWorthy()
           })
           peer.on('close', e => {
             self.app._log('Source Peer Closed')
@@ -422,12 +423,13 @@ require('domready')(re => {
         setTimeout(e=>{
           this.offersOut--
           //this.disnit(msg.peerId, mask)
-        }, 1111*3)
+        }, 1111*30)
         let mask = short().generate()
         let peer = this.initConnect(msg.peerId, false, mask)
         peer.once('connect', e =>{
           self.peers[msg.peerId] = peer
           app.audio.send('addPeer', null, msg.peerId)
+          self.isSeekWorthy()
           //if(app.audio.firstBroadcastBuffer) peer.write(app.audio.firstBroadcastBuffer)
         })
         peer.once('close', e =>{

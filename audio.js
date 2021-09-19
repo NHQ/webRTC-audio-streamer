@@ -39,6 +39,10 @@ module.exports = function(self){
       self.addEventListener('message', msg =>{
       //console.log(msg)
         switch (msg.data.type){
+          case 'param':
+            console.log(msg)
+            audio[msg.data.id].gain.value = Math.max(0, msg.data.data)
+          break;
           case 'start':
             
           break;
