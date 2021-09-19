@@ -128,7 +128,7 @@ require('domready')(re => {
     app.session = session
   app._log = function(_id) { return e => {
       //ui.debug.appendChild(h('p', e.toString()))    
-      app.network.broadcast('debug', JSON.stringify({id: _id, log: e}))
+      debub.broadcast('debug', JSON.stringify({id: _id, log: e}))
       console.log(e)
   } }(session.broadcasting ? session.id : session.stream)
     store.set('session', session)
