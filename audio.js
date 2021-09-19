@@ -220,7 +220,7 @@ module.exports = function(self){
       }
     }
 
-  var audio = new App(new AudioContext({sampleRate: 48000}), broadcasting)
+  var audio = new App(new WebAudioContext({sampleRate: 48000}), broadcasting)
 
   cb(null, audio)
   }
