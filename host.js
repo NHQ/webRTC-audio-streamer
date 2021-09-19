@@ -192,8 +192,8 @@ require('domready')(re => {
   function initAudio(app, cb){
     var iframe = require('../iframarfi')
 
-    var audio = require('./audio.js')
-    //ui.tracks.appendChild(audio)
+    var audio = iframe(require('./audio.js'))
+    ui.tracks.appendChild(audio)
     
     window.addEventListener('message', msg => {
       //console.log(msg.data.data.length)
