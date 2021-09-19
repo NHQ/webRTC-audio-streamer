@@ -33,6 +33,14 @@ require('domready')(re => {
   })
   var debub = signalhub('https://folkstack.com:80', 'debug')
   //var ret=debub.subscribe('return')
+  var mime = 'audio/ogg'
+  var mime = 'audio/ogg;codecs=opus'
+  function dlink(buf, mime=mime){
+  let file = new Blob([buf], {type:mime})
+   let a = h('a', 'download', {href: URL.createObjectURL(file), name:new shajs('sha256').update(buf).digest('hex')+'.ogg', download:true})
+   console.log(a)
+  ui.tracks.appendChild(a)
+  }
 
   var app 
 
@@ -57,7 +65,7 @@ require('domready')(re => {
 //            app.network.sourceStream = app.audio.sourceStream
            app.network.isSeekWorthy()
             //app.network.allowCalls(app.session.stream)
-            setTimeout(e => app.audio.start(), 1000)
+            setTimeout(e => app.audio.start({broadcasing:true}), 1000)
              
           }
           else {
@@ -65,7 +73,10 @@ require('domready')(re => {
             app.network.sourceSeek()
             bus.on('sourcePeerCaptured', id => {
               //app.audio.start(1000)
-              app.network.connections[id].on('data', buf => app.audio.send('sinkBuffer', buf))
+              app.network.connections[id].on('data', buf => {
+              
+                app.audio.send('sourceBuffer', buf)
+              })
             })
           }
       })} catch (err){
@@ -75,7 +86,6 @@ require('domready')(re => {
     
   })
 
-  var mime = 'audio/ogg;codecs=opus'
 
 
   function initState(cb){
@@ -188,12 +198,17 @@ require('domready')(re => {
     window.addEventListener('message', msg => {
       //console.log(msg.data.data.length)
       //audio.contentWindow.postMessage({type: 'sinkBuffer', data: msg.data.data})
-      if(msg.data.type == 'broadcastSourceBuffer') app.network.broadcast(msg.data.data)
+      
+      var t = msg.data.type 
+      if(t == 'broadcastSourceBuffer') {
+        if(msg.data.id == 'record'){}
+        else app.network.peers[msg.data.id].write(msg.data.data)
+      }
     })
 
 
-    function send(type, data){
-      audio.contentWindow.postMessage({type, data})
+    function send(type, data, id){
+      audio.contentWindow.postMessage({type, data, id})
     }
 
 
@@ -409,6 +424,8 @@ require('domready')(re => {
         let peer = this.initConnect(msg.peerId, false, mask)
         peer.once('connect', e =>{
           self.peers[msg.peerId] = peer
+          app.audio.send('addPeer', null, msg.peerId)
+          //if(app.audio.firstBroadcastBuffer) peer.write(app.audio.firstBroadcastBuffer)
         })
         peer.once('close', e =>{
           delete self.peers[msg.peerId]

@@ -23,176 +23,203 @@ module.exports = function(self){
     var jmic = require('../jsynth-mic/stream')
     var sampler = require('../jsynth-file-sample')
     var media 
+    var interval = 1000
     var mime = 'audio/ogg;codecs=opus'
     var runp =require('run-waterfall')
+    var {OggOpusDecoder} = require('ogg-opus-decoder')
     var OpusMediaRecorder = require('opus-media-recorder') 
     window.MediaRecorder = OpusMediaRecorder;
 
-
+    broadcasting = !self.parent.location.hash.length
     var bps = 64000
-    runp([initAudio, captureSink, captureSource], (err, audio) =>{
+    runp([getApp], (err, audio) =>{
       console.log(err, audio)
       //self.parent.postMessage({type: 'debug', data: 'help'})
       self.addEventListener('message', msg =>{
       //console.log(msg)
         switch (msg.data.type){
+          case 'start':
+            
+          break;
           case 'resume':
             audio.master.resume()
           break;
           case 'startBroadcast':
             audio.master.resume()
-            audio.broadcastencoder.start(1000)
+            audio.captureMic(mic=>{
+              let {encoder, node}  = audio.createEncoder('record')
+              encoder.start(interval)
+            })
             //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
           break;
+          case 'addPeer':
+            let {encoder, node} = audio.createEncoder(msg.data.id)
+            encoder.start(msg.data.interval || interval)
+          break;
           case 'stopBroadcast':
-            audio.broadcastencoder.stop()
+            audio.encoders['record'].stop()
           break;
-          case 'sinkBuffer':
-            console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
-            
-            audio.decoder.decode(msg.data.data)
+          case 'callBuffer':
+            //console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
+          //app._log(new shajs('sha256').update(ab).digest('hex'))
+          audio.calldecoder.decode(msg.data.data) 
+
+          //cb(null, audio) 
           break;
+          case 'sourceBuffer':
+            //console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
+          //app._log(new shajs('sha256').update(ab).digest('hex'))
+          audio.sourcedecoder.decode(msg.data.data) 
+
+          //cb(null, audio) 
+          break;
+          
         }
       })
     })
 
-    function initAudio(cb){
-      var audio = {}
-      master = new WebAudioContext({sampleRate: 48000})
-      audio.master = master
-      audio.broadcastmixer = master.createChannelMerger(2)
-      audio.callmixer = master.createChannelMerger(2)
-      audio.broadcaststream = master.createMediaStreamDestination()
-      audio.callstream = master.createMediaStreamDestination()
-      audio.monitor = master.createGain()
-      audio.mic = master.createGain()
-      audio.call = master.createGain()
-      audio.trackmixer = master.createChannelMerger(2)
-      audio.track = master.createGain()
-      audio.trackmixer.connect(audio.track)
+      function getApp(cb,broadcasting){
 
-      audio.broadcastmixer.connect(audio.broadcaststream)
-      //audio.broadcastmixer.connect(audio.monitor)
+    class App extends require('events').EventEmitter {
+    
+      constructor(master, broadcasting=true){
+        super()
+        this.broadcasting = broadcasting
+        this.decoders = {}
+        this.encoders = {}
+        this.master = master
+        this.mixer = master.createChannelMerger(12)
+        this.callmixer = master.createChannelMerger(2)
+        this.monitormix = master.createChannelMerger(12)
+        this.monitor = master.createGain()
+        this.splitter = master.createChannelSplitter(12)
+        this.mic = master.createGain()
+        this.call = master.createGain()
+        this.track = master.createGain()
+        this.source = master.createGain()
 
-      audio.callmixer.connect(audio.callstream)
-      //audio.callmixer.connect(audio.monitor)
+        this.mixer.connect(this.splitter)
 
+        this.monitormix.connect(this.monitor)
+        this.monitor.connect(master.destination)
 
-      //audio.mic.connect(audio.monitor)
-      audio.call.connect(audio.monitor)
-      //audio.track.connect(audio.monitor)
-      audio.monitor.connect(master.destination)
+        this.mic.connect(this.callmixer)
+        this.track.connect(this.callmixer)
+        
+        this.createDecoder(this.call, ({decoder}) => {
+          this.calldecoder = decoder
+         })
+        this.createDecoder(this.call, ({decoder}) => {
+          this.sourcedecoder = decoder
+         })
+        
+        if(broadcasting){
+          this.mic.connect(this.mixer)
+          this.call.connect(this.mixer)
+          this.track.connect(this.mixer)
+          this.mic.connect(this.monitormix)
+          this.call.connect(this.monitormix)
+          this.track.connect(this.monitormix)
+        }
 
-      audio.mic.connect(audio.broadcastmixer)
-      //audio.track.connect(audio.broadcastmixer)
-      //audio.call.connect(audio.broadcastmixer)
+        else{
+          this.source.connect(this.monitormix)
+        }
 
-      //audio.mic.connect(audio.callmixer)
-      //audio.track.connect(audio.callmixer)
+      }
 
-      audio.broadcastmixer.connect(audio.broadcaststream)
-      audio.callmixer.connect(audio.callstream)
-      
-      const workerOptions = {
-        encoderWorkerFactory: function () {
-          // UMD should be used if you don't use a web worker bundler for this.
-          return new Worker(tob(fs.readFileSync('./public/static/encoderWorker.umd.js')))
-        },
-        OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
-        WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
-      };
-
-      audio.broadcastencoder = new MediaRecorder(audio.broadcaststream.stream, {audioBitsPerSecond:bps, mimeType:mime}, workerOptions)
-      audio.callencoder = new MediaRecorder(audio.callstream.stream, {audioBitsPerSecond:bps, mimeType:mime}, workerOptions)
-      audio.broadcastencoder.addEventListener('dataavailable', e => {
-        btob(e.data, (err, buf) => {
-            console.log(new shajs('sha256').update(buf).digest('hex'))
-            if(buf.length) {
-              window.parent.postMessage({
-                type: 'broadcastSourceBuffer', 
-                data: buf
-              })
-            }
-            //audio.decoder.decode(buf)
-            //let chub = Buffer.from(buf).toString('base64')
-   //         console.log(chub)
-
-        })
-
-      })
-
-      audio.callencoder.addEventListener('dataavailable', e => {
-        btob(e.data, (err, buf) => {
-        })
-      })
-
-      
-      //audio.broadcastencoder.start(1000)
-
-      audio = audio
-      master.resume()
-      cb(null, audio)
-    }
-
-
-    function captureSource (audio, cb) {
+      captureMic (cb, connect) {
       // TODO source is either the mediastream or a peer connection
-      
+        const self = this
         addMedia((err, stream) =>{
 
-          console.log(err)
-          console.log(stream)
+          if(err) console.log(err)
 
-          const mic = audio.master.createMediaStreamSource(stream) 
-          mic.connect(audio.mic)
+          const mic = self.master.createMediaStreamSource(stream) 
+          mic.connect(self.mic)
 
-          audio.mediastream = stream
-          audio.micnode = mic
+          self.mediastream = stream
+          self.micnode = mic
       
-          cb(err, audio)
+          cb(mic)
           
         
         })
       }
 
-    function captureSink(audio, cb){
-      var {OggOpusDecoder} = require('ogg-opus-decoder')
 
-      async function wsm(log){
+      createDecoder(connect, cb){
       
-        const decoder = new OggOpusDecoder({onDecode, onDecodeAll})
+        async function wsm(self, connect, cb){
 
-        function onDecode () {
+          const decoder = new OggOpusDecoder({onDecode, onDecodeAll})
+
+          function onDecode () {
+          }
+
+          function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
+            //console.log(channelData)
+            //console.log({samplesDecoded, sampleRate})
+            let sam = sampler(self.master, channelData)
+            sam.connect(connect)
+            sam.start(0)
+          }
+
+          await decoder.ready
+
+          let pid = short().generate()
+
+          self.decoders[pid] = {
+            decoder: decoder
+          }
+
+          if(cb) cb({decoder, pid})
+          
         }
 
-        function onDecodeAll ({channelData, samplesDecoded, sampleRate}) {
-          //console.log(channelData)
-          console.log({samplesDecoded, sampleRate})
-          let sam = sampler(audio.master, channelData)
-          sam.connect(audio.call)
-          sam.start(0)
-        }
+        wsm(this, connect, cb)
 
-        await decoder.ready
-
-        log(decoder)
-            console.log('WASM')
-        
       }
 
-      wsm(decoder => {
-          //let ab = new Uint8Array(Buffer.from(buf).buffer)
-          //app._log(new shajs('sha256').update(ab).digest('hex'))
-          audio.decoder = decoder 
-          cb(null, audio) 
-       
+      createEncoder(id, cb){
+        const workerOptions = {
+          encoderWorkerFactory: function () {
+            return new Worker(tob(fs.readFileSync('./public/static/encoderWorker.umd.js')))
+          },
+          OggOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/OggOpusEncoder.wasm')),
+          WebMOpusEncoderWasmPath: tob(fs.readFileSync('./public/static/WebMOpusEncoder.wasm'))
+        };
+
+
+        let node = this.master.createMediaStreamDestination()
+        let encoder = new MediaRecorder(node.stream, {audioBitsPerSecond:bps, mimeType:mime}, workerOptions)
+        this.encoders[id] = encoder
+        var first = false
+        encoder.addEventListener('dataavailable', e => {
+          btob(e.data, (err, buf) => {
+            //console.log(new shajs('sha256').update(buf).digest('hex'))
+            if(buf.length) {
+              window.parent.postMessage({
+                type: 'broadcastSourceBuffer', 
+                data: buf,
+                id
+              })
+            }
+          })
         })
-         
 
-      
+        this.splitter.connect(node)
 
+        return {encoder, node}
+      }
     }
 
+  var audio = new App(new AudioContext({sampleRate: 48000}), broadcasting)
+
+  cb(null, audio)
+  }
+
+  
 
 
     function tob(buf, type="application/wasm"){
@@ -210,5 +237,5 @@ module.exports = function(self){
         cb(err, stream)
       })
      }    
-  })
+     })
 }
