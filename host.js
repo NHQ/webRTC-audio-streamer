@@ -64,7 +64,7 @@ require('domready')(re => {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
            app.network.isSeekWorthy()
-            app.network.allowCalls(app.session.channel)
+            app.network.allowCalls(app.session.stream)
             setTimeout(e => app.audio.start({broadcasing:true}), 1000)
              
           }
@@ -296,6 +296,7 @@ require('domready')(re => {
     }
 
     allowCalls(id){
+      console.log(id)
       let calls = this.hub.subscribe('caller:'+id)
       calls.on('data', msg=>{
         console.log(msg)
