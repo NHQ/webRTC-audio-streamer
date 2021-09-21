@@ -146,7 +146,7 @@ require('domready')(re => {
   function initUI(app, cb){
   
     bus.on('caller', msg => {
-      let c = h('button', {id: msg.peerId, onclick: e => app.initCall(e.target.id)})
+      let c = h('button', {id: msg.peerId, onclick: e => app.network.initCall(e.target.id)})
       ui.tracks.appendChild(c)
     })
 
@@ -215,7 +215,7 @@ require('domready')(re => {
       if(t == 'broadcastSourceBuffer') {
         if(msg.data.id == 'record'){}
         else {
-          let = u = app.network.peers[msg.data.id]
+          let = u = app.network.peers[msg.data.id] || {}
           if(u.writable) u.write(msg.data.data)
         }
       }
