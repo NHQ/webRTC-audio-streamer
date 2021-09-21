@@ -64,7 +64,7 @@ require('domready')(re => {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
            app.network.isSeekWorthy()
-            app.network.allowCalls()
+            app.network.allowCalls(app.session.channel)
             setTimeout(e => app.audio.start({broadcasing:true}), 1000)
              
           }
@@ -146,7 +146,7 @@ require('domready')(re => {
   function initUI(app, cb){
   
     bus.on('caller', msg => {
-      let c = h('button', {id: msg.peerId, onclick: e => app.network.initCall(e.target.id)})
+      let c = h('button', {id: msg.peerId, onclick: e => bus.emit('call', e.target.id)})
       ui.tracks.appendChild(c)
     })
 
@@ -296,7 +296,7 @@ require('domready')(re => {
     }
 
     allowCalls(id){
-      let calls = this.hub.subscribe('caller:'+this.id)
+      let calls = this.hub.subscribe('caller:'+id)
       calls.on('data', msg=>{
         console.log(msg)
         //msg=JSON.parse(msg)
