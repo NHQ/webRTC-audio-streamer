@@ -18,6 +18,7 @@ module.exports = function(self){
     const btob = require('blob-to-buffer')
     const thru = require('through2')
     var store = require('store')
+    var h = require('hyperscript')
     var shajs = require('sha.js')
     const Time = require('../since-when')
     var jmic = require('../jsynth-mic/stream')
@@ -31,7 +32,7 @@ module.exports = function(self){
     window.MediaRecorder = OpusMediaRecorder;
 
     broadcasting = !self.parent.location.hash.length
-    var bps = 64000
+    var bps = 48000
     try{
     runp([getApp], (err, audio) =>{
       console.log(err, audio)
@@ -80,6 +81,14 @@ module.exports = function(self){
 
           //cb(null, audio) 
           break;
+          case 'addAudioTrack':
+            audio.addAudioTrack(msg.data.id,  msg.data.data)
+          break;
+          case 'audioTrackControl':
+            let track = audio.tracks[msg.data.id] //= msg.data.data
+            let cmd = data.msg.data
+            audio[cmd](track)
+          break;
           
         }
       })
@@ -97,6 +106,7 @@ module.exports = function(self){
         this.broadcasting = broadcasting
         this.decoders = {}
         this.encoders = {}
+        this.tracks = {}
         this.master = master
         this.mixer = master.createChannelMerger(12)
         this.callmixer = master.createChannelMerger(2)
@@ -136,6 +146,20 @@ module.exports = function(self){
           this.source.connect(this.monitormix)
         }
 
+      }
+
+      addAudioTrack(id, buf){
+        var a = h('audio.invert', {controls: true, id: id, src : URL.createObjectURL(buf)})
+        document.body.appendChild(a)
+        var c = this.master.createMediaElementSource(a)
+        console.log(a)
+        //a.loop = true
+        c.connect(this.track)
+
+      }
+
+      play(id){
+        
       }
 
       captureMic (cb, connect) {

@@ -148,18 +148,16 @@ require('domready')(re => {
       app.network.initCall(app.session.stream)
     })
     ui.file.addEventListener('change', e => {
-      //console.log(e.target.files[0])
-      var a = h('audio.invert', {controls: true, src : URL.createObjectURL(e.target.files[0])})
-      ui.tracks.appendChild(a)
+      console.log(e.target.files[0])
+      //var a = h('audio.invert', {controls: true, src : URL.createObjectURL(e.target.files[0])})
+      //ui.tracks.appendChild(a)
       //var c= app.audio.master.createMediaElementSource(a)
       //console.log(a)
       //c.connect(app.audio.trackmixer)
-      
+      let id = short().generate()
+      //app.tracks[id] = 
+      app.audio.send('addAudioTrack', e.target.files[0], id) 
       btob(e.target.files[0], (err, buf) => {
-        audio.contentWindow.postMessage({
-          type: 'audioTrack',
-          data: buf
-        })
        // sampler(app.audio.master, buf.buffer, (err, node) =>{
           //node.connect(app.audio.master.destination)
           //node.start(0)
@@ -281,11 +279,11 @@ require('domready')(re => {
     }
 
     disallowCalls(id){
-      this.hub.unsubscribe('caller:'+id)
+      this.hub.unsubscribe('caller:'+this.id)
     }
 
     allowCalls(id){
-      let calls = this.hub.subscribe('caller:'+id)
+      let calls = this.hub.subscribe('caller:'+this.id)
       calls.on('data', msg=>{
         msg=JSON.parse(msg)
         bus.emit('caller', msg)
