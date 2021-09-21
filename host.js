@@ -64,7 +64,7 @@ require('domready')(re => {
             app.network.distance = 1
 //            app.network.sourceStream = app.audio.sourceStream
            app.network.isSeekWorthy()
-            //app.network.allowCalls(app.session.stream)
+            app.network.allowCalls()
             setTimeout(e => app.audio.start({broadcasing:true}), 1000)
              
           }
