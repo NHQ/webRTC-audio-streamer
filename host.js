@@ -79,6 +79,11 @@ require('domready')(re => {
               })
             })
           }
+
+          bus.on('callSourceCaptured', stream => {
+            app.audio.send('callBuffer', buf)
+            
+          })
       })} catch (err){
         app._log(err)
       }
@@ -139,10 +144,15 @@ require('domready')(re => {
 
 
   function initUI(app, cb){
+  
+    bus.on('caller', msg => {
+      let c = h('button', {id: msg.peerId, onclick: e => app.initCall(e.target.id)})
+      ui.tracks.appendChild(c)
+    })
 
     ui.livelink.innerText = `${window.location.href}#${app.session.stream}`
     ui.copybutton.onchange = e => {
-      navigator.clipboard.writeText(ui.link.innerText)
+      navigator.clipboard.writeText(ui.livelink.innerText)
     }
     ui.request.addEventListener('change', e => {
       app.network.initCall(app.session.stream)
@@ -204,7 +214,10 @@ require('domready')(re => {
       }
       if(t == 'broadcastSourceBuffer') {
         if(msg.data.id == 'record'){}
-        else app.network.peers[msg.data.id].write(msg.data.data)
+        else {
+          let = u = app.network.peers[msg.data.id]
+          if(u.writable) u.write(msg.data.data)
+        }
       }
     })
 
@@ -300,8 +313,8 @@ require('domready')(re => {
       let peer = this.initConnect(id, false, this.id)
       peer.once('connected', e =>{
         this.callers[id] = peer
-        bus.emit('Call Source Captured', peer)
-
+        bus.emit('callSourceCaptured', peer)
+        
       })
       
       
@@ -311,7 +324,7 @@ require('domready')(re => {
       let peer = this.initConnect(id, true, this.id)
       peer.once('connected', e =>{
         this.callers[id] = peer
-        bus.emit('Call Source Captured', peer)
+        bus.emit('callSourceCaptured', peer)
 
       })
     }
