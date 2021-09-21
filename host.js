@@ -298,7 +298,8 @@ require('domready')(re => {
     allowCalls(id){
       let calls = this.hub.subscribe('caller:'+this.id)
       calls.on('data', msg=>{
-        msg=JSON.parse(msg)
+        console.log(msg)
+        //msg=JSON.parse(msg)
         bus.emit('caller', msg)
       })
       bus.on('call', msg =>{
