@@ -80,7 +80,7 @@ require('domready')(re => {
             })
           }
 
-          bus.on('callSourceCaptured', stream => {
+          bus.on('callSourceCaptured', id => {
 //            app.audio.send('addPeer', 'caller', id)
             
             app.network.conncections[id].on('data', buf => {
