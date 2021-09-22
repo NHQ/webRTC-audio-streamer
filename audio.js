@@ -155,7 +155,7 @@ module.exports = function(self){
 
         else{
           this.source.connect(this.monitormix)
-       //   this.call.connect(this.callmixer)
+          this.call.connect(this.monitormix)
         }
 
       }
