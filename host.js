@@ -220,9 +220,9 @@ require('domready')(re => {
         app._log(msg.data.data)
       }
       if(t == 'audioSourceBuffer') {
-        console.log(msg)
         if(msg.data.id == 'record'){}
         else {
+          console.log(msg)
           let = u = app.network.connections[msg.data.id] || {}
           if(u.writable) u.write(msg.data.data)
         }
@@ -325,6 +325,7 @@ require('domready')(re => {
       peer.once('connected', e =>{
         this.callers[id] = peer
         bus.emit('callSourceCaptured', id)
+        peer.on('data', e => console.log(e))
         
       })
       
@@ -337,6 +338,7 @@ require('domready')(re => {
       peer.once('connected', e =>{
         this.callers[id] = peer
         bus.emit('callSourceCaptured', id)
+        peer.on('data', e => console.log(e))
 
       })
     }
