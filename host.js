@@ -83,7 +83,7 @@ require('domready')(re => {
           bus.on('callSourceCaptured', id => {
 //            app.audio.send('addPeer', 'caller', id)
             
-            app.network.conncections[id].on('data', buf => {
+            app.network.connections[id].on('data', buf => {
               console.log(buf)
               app.audio.send('callBuffer', buf)
               
