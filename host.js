@@ -338,6 +338,7 @@ require('domready')(re => {
       peer.once('connected', e =>{
         this.callers[id] = peer
         bus.emit('callSourceCaptured', id)
+        console.log('CALL PEER CONNECTED')
         peer.on('data', e => console.log(e))
 
       })
@@ -471,7 +472,8 @@ require('domready')(re => {
     }
 
     disnit(id, mask){
-      //delete this.connecting[id]
+      delete this.connecting[id]
+      this.isSeekWorthy()
       //this.hub.unsubscribe(mask)
     }
 
