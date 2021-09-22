@@ -223,7 +223,7 @@ require('domready')(re => {
         if(msg.data.id == 'record'){}
         else {
           let u = app.network.connections[msg.data.id] || {}
-          console.log(msg, u)
+          //console.log(msg, u)
           if(u.writable) u.write(msg.data.data)
         }
       }
