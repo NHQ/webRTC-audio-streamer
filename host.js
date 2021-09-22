@@ -146,7 +146,7 @@ require('domready')(re => {
   function initUI(app, cb){
   
     bus.on('caller', msg => {
-      let c = h('button', {id: msg.peerId, onclick: e => bus.emit('call', e.target.id)})
+      let c = h('button', {id: msg.peerId, onclick: e => bus.emit('call', {peerId: e.target.id})})
       ui.tracks.appendChild(c)
     })
 
