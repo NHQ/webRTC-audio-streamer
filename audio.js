@@ -97,7 +97,7 @@ module.exports = function(self){
     
     }
 
-      function getApp(cb,broadcasting){
+      function getApp(broadcasting, cb){
 
     class App extends require('events').EventEmitter {
     
