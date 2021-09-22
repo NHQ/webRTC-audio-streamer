@@ -245,6 +245,7 @@ module.exports = function(self){
         encoder.addEventListener('dataavailable', e => {
           btob(e.data, (err, buf) => {
             //console.log(new shajs('sha256').update(buf).digest('hex'))
+            console.log(buf, id)
             if(buf.length) {
               window.parent.postMessage({
                 type: 'sourceBuffer', 
