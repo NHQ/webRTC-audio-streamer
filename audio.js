@@ -129,7 +129,7 @@ module.exports = function(self){
         this.createDecoder(this.call, ({decoder}) => {
           this.calldecoder = decoder
          })
-        this.createDecoder(this.call, ({decoder}) => {
+        this.createDecoder(this.source, ({decoder}) => {
           this.sourcedecoder = decoder
          })
         
