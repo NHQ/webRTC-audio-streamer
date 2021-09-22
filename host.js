@@ -81,7 +81,7 @@ require('domready')(re => {
           }
 
           bus.on('callSourceCaptured', stream => {
-            app.audio.send('callBuffer', buf)
+            stream.on('data', buf => app.audio.send('callBuffer', buf))
             
           })
       })} catch (err){
@@ -156,6 +156,7 @@ require('domready')(re => {
     }
     ui.request.addEventListener('change', e => {
       app.network.initCall(app.session.stream)
+      app.audio.send('captureMic', null, app.session.stream)
     })
     ui.file.addEventListener('change', e => {
       console.log(e.target.files[0])
@@ -212,10 +213,10 @@ require('domready')(re => {
       if(t == 'debug'){
         app._log(msg.data.data)
       }
-      if(t == 'broadcastSourceBuffer') {
+      if(t == 'sourceBuffer') {
         if(msg.data.id == 'record'){}
         else {
-          let = u = app.network.peers[msg.data.id] || {}
+          let = u = app.network.connections[msg.data.id] || {}
           if(u.writable) u.write(msg.data.data)
         }
       }
@@ -303,16 +304,16 @@ require('domready')(re => {
         //msg=JSON.parse(msg)
         bus.emit('caller', msg)
       })
-      bus.on('call', msg =>{
+      bus.once('call', msg =>{
         this.callDirect(msg.peerId)
       })
 
     }
 
     initCall(id){
-      
-      this.hub.broadcast('caller:'+id, {peerId: this.id})
-      let peer = this.initConnect(id, false, this.id)
+      let mask = short().genrate() 
+      this.hub.broadcast('caller:'+id, {peerId: mask})
+      let peer = this.initConnect(id, false, mask)
       peer.once('connected', e =>{
         this.callers[id] = peer
         bus.emit('callSourceCaptured', peer)

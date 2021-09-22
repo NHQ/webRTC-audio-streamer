@@ -50,6 +50,16 @@ module.exports = function(self){
           case 'resume':
             audio.master.resume()
           break;
+          case 'captureMic':
+            audio.master.resume()
+            audio.captureMic((err, mic)=>{
+      self.parent.postMessage({type: 'debug', data: err})
+      self.parent.postMessage({type: 'debug', data: !!mic})
+              let {encoder, node}  = audio.createEncoder(msg.data.id)
+              encoder.start(interval)
+            })
+            //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
+          break;
           case 'startBroadcast':
             audio.master.resume()
             audio.captureMic((err, mic)=>{
@@ -144,6 +154,7 @@ module.exports = function(self){
 
         else{
           this.source.connect(this.monitormix)
+          this.call.connect(this.callmixer)
         }
 
       }
@@ -234,7 +245,7 @@ module.exports = function(self){
             //console.log(new shajs('sha256').update(buf).digest('hex'))
             if(buf.length) {
               window.parent.postMessage({
-                type: 'broadcastSourceBuffer', 
+                type: 'sourceBuffer', 
                 data: buf,
                 id
               })
