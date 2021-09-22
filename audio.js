@@ -248,7 +248,7 @@ module.exports = function(self){
             console.log(buf, id)
             if(buf.length) {
               window.parent.postMessage({
-                type: 'sourceBuffer', 
+                type: 'audioSourceBuffer', 
                 data: buf,
                 id
               })

@@ -219,7 +219,8 @@ require('domready')(re => {
       if(t == 'debug'){
         app._log(msg.data.data)
       }
-      if(t == 'sourceBuffer') {
+      if(t == 'audioSourceBuffer') {
+        console.log(msg)
         if(msg.data.id == 'record'){}
         else {
           let = u = app.network.connections[msg.data.id] || {}
