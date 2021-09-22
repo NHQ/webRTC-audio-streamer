@@ -311,7 +311,7 @@ require('domready')(re => {
     }
 
     initCall(id){
-      let mask = short().genrate() 
+      let mask = short().generate() 
       this.hub.broadcast('caller:'+id, {peerId: mask})
       let peer = this.initConnect(id, false, mask)
       peer.once('connected', e =>{
