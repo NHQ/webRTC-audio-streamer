@@ -222,8 +222,8 @@ require('domready')(re => {
       if(t == 'audioSourceBuffer') {
         if(msg.data.id == 'record'){}
         else {
-          console.log(msg)
           let = u = app.network.connections[msg.data.id] || {}
+          console.log(msg, u)
           if(u.writable) u.write(msg.data.data)
         }
       }
