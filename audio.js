@@ -81,6 +81,7 @@ module.exports = function(self){
           case 'callBuffer':
             //console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
           //app._log(new shajs('sha256').update(ab).digest('hex'))
+          console.log(msg)
           audio.calldecoder.decode(msg.data.data) 
 
           //cb(null, audio) 
