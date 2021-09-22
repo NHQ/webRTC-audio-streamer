@@ -72,7 +72,7 @@ module.exports = function(self){
           break;
           case 'addPeer':
             let source = msg.data.data == 'broadcast' ? audio.splitter : audio.callmixer
-            let {encoder, node} = audio.createEncoder(audio.splitter, msg.data.id)
+            let {encoder, node} = audio.createEncoder(source, msg.data.id)
             encoder.start(msg.data.interval || interval)
           break;
           case 'stopBroadcast':
