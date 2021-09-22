@@ -442,7 +442,7 @@ require('domready')(re => {
         let peer = this.initConnect(msg.peerId, false, mask)
         peer.once('connect', e =>{
           self.peers[msg.peerId] = peer
-          app.audio.send('addPeer', null, msg.peerId)
+          app.audio.send('addPeer', 'broadcast', msg.peerId)
           self.isSeekWorthy()
           //if(app.audio.firstBroadcastBuffer) peer.write(app.audio.firstBroadcastBuffer)
         })

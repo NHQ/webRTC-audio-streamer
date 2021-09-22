@@ -55,8 +55,8 @@ module.exports = function(self){
             audio.captureMic((err, mic)=>{
       self.parent.postMessage({type: 'debug', data: err})
       self.parent.postMessage({type: 'debug', data: !!mic})
-              let {encoder, node}  = audio.createEncoder(msg.data.id)
-              encoder.start(interval)
+          //    let {encoder, node}  = audio.createEncoder(msg.data.id)
+          //    encoder.start(interval)
             })
             //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
           break;
@@ -65,13 +65,14 @@ module.exports = function(self){
             audio.captureMic((err, mic)=>{
       self.parent.postMessage({type: 'debug', data: err})
       self.parent.postMessage({type: 'debug', data: !!mic})
-              let {encoder, node}  = audio.createEncoder('record')
+              let {encoder, node}  = audio.createEncoder(this.splitter, 'record')
               encoder.start(interval)
             })
             //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
           break;
           case 'addPeer':
-            let {encoder, node} = audio.createEncoder(msg.data.id)
+            let source = msg.data.data == 'broadcast' ? this.splitter : this.callmixer
+            let {encoder, node} = audio.createEncoder(this.splitter, msg.data.id)
             encoder.start(msg.data.interval || interval)
           break;
           case 'stopBroadcast':
@@ -154,7 +155,7 @@ module.exports = function(self){
 
         else{
           this.source.connect(this.monitormix)
-          this.call.connect(this.callmixer)
+       //   this.call.connect(this.callmixer)
         }
 
       }
@@ -226,7 +227,7 @@ module.exports = function(self){
 
       }
 
-      createEncoder(id, cb){
+      createEncoder(source, id, cb){
         const workerOptions = {
           encoderWorkerFactory: function () {
             return new Worker(tob(fs.readFileSync('./public/static/encoderWorker.umd.js')))
@@ -253,7 +254,7 @@ module.exports = function(self){
           })
         })
 
-        this.splitter.connect(node)
+        source.connect(node)
 
         return {encoder, node}
       }
