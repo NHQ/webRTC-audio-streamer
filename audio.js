@@ -65,14 +65,14 @@ module.exports = function(self){
             audio.captureMic((err, mic)=>{
       self.parent.postMessage({type: 'debug', data: err})
       self.parent.postMessage({type: 'debug', data: !!mic})
-              let {encoder, node}  = audio.createEncoder(this.splitter, 'record')
+              let {encoder, node}  = audio.createEncoder(audio.splitter, 'record')
               encoder.start(interval)
             })
             //setTimeout(e => {audio.broadcastencoder.stop()}, 3000)
           break;
           case 'addPeer':
-            let source = msg.data.data == 'broadcast' ? this.splitter : this.callmixer
-            let {encoder, node} = audio.createEncoder(this.splitter, msg.data.id)
+            let source = msg.data.data == 'broadcast' ? audio.splitter : audio.callmixer
+            let {encoder, node} = audio.createEncoder(audio.splitter, msg.data.id)
             encoder.start(msg.data.interval || interval)
           break;
           case 'stopBroadcast':
