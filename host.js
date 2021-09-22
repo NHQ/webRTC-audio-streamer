@@ -81,7 +81,9 @@ require('domready')(re => {
           }
 
           bus.on('callSourceCaptured', stream => {
-            stream.on('data', buf => app.audio.send('callBuffer', buf))
+//            app.audio.send('addPeer', 'caller', id)
+            
+            app.network.conncections[id].on('data', buf => app.audio.send('callBuffer', buf))
             
           })
       })} catch (err){
@@ -314,9 +316,10 @@ require('domready')(re => {
       let mask = short().generate() 
       this.hub.broadcast('caller:'+id, {peerId: mask})
       let peer = this.initConnect(id, false, mask)
+            app.audio.send('addPeer', 'caller', id)
       peer.once('connected', e =>{
         this.callers[id] = peer
-        bus.emit('callSourceCaptured', peer)
+        bus.emit('callSourceCaptured', id)
         
       })
       
@@ -325,9 +328,10 @@ require('domready')(re => {
 
     callDirect(id){
       let peer = this.initConnect(id, true, this.id)
+            app.audio.send('addPeer', 'caller', id)
       peer.once('connected', e =>{
         this.callers[id] = peer
-        bus.emit('callSourceCaptured', peer)
+        bus.emit('callSourceCaptured', id)
 
       })
     }
@@ -371,7 +375,7 @@ require('domready')(re => {
         } else {
           self.app._log('Err: No source peer found.')    
         }
-      }, 33000)
+      }, 3000)
       
 
       this.hub.broadcast('source', 
