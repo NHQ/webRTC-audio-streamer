@@ -1,65 +1,67 @@
 var bus = require('page-bus')
-var short = require('short-uuid')
-var id = short().generate()
-var emitters = {}
-var names = []
-var meta = bus({key: '_meta_'})
-var join = bus({key: '_join_'})
-var self = bus({key: id})
-var swarm = {} // ids
-var count = 0
+//var short = require('short-uuid')
 
-join.emit('data', {id: id})
+module.exports = function(name){
+//  var id = short().generate()
+  var id = name
+  var emitters = {}
+  var names = []
+  var meta = bus({key: '_meta_'})
+  var join = bus({key: '_join_'})
+  var self = bus({key: id})
+  var swarm = {} // ids
+  var count = 0
 
-join.on('data', e => {
-  if(e.id == id) return
-  let em = swarm[e.id] = bus({key: e.id})
-  count++
-  if(Math.random() <= 1 / Math.pow(count, 2)) return
-  else em.emit('data', {events: names, swamrm: Object.keys(swarm)})
-})
+  join.emit('data', {id: id})
 
-self.on('data', e => {
-  e.events.forEach(ev => {
-    if(!emitters[e.name]) {
-      var emitter = emitters[e.name] = bus({key:e.name})
+  join.on('data', e => {
+    if(e.id == id) return
+    else if(swarm[e.id]) return
+    else {
+      var em = swarm[e.id] = bus({key: e.id})
+      count++
+      join.emit('data', {id: id})
     }
   })
-  e.swarm.forEach(s => {
-    if(!swarm[s]) swarm[s] = bus({key: s})
+
+  self.on('data', e => {
+    e.events.forEach(ev => {
+      if(!emitters[e.name]) {
+        var emitter = emitters[e.name] = bus({key:e.name})
+      }
+    })
   })
- count = swarm.length
-})
 
-meta.on('data', e => {
-  if(!emitters[e.name]) emitters[e.name] = bus({key:e.name})
-})
+  meta.on('data', e => {
+    if(!emitters[e.name]) emitters[e.id] = bus({key:e.id})
+  })
 
-module.exports = {on, once, emit}
+  return {on, once, emit}
 
-function on(name, fn){
-  if(!emitters[name]) {
-    names.push(name)
-    meta.emit('data', {name: name})
-    setTimeout(e => on(name, fn), 0)
-  }  
-  else {
-    emitters[name].on(name, fn)
+  function on(name, fn){
+    if(!emitters[name]) {
+      names.push(name)
+      meta.emit('data', {name: name})
+      setTimeout(e => on(name, fn), 0)
+    }
+    else {
+      emitters[name].on(name, fn)
+    }
   }
-}
 
-function once(name, fn){
-  if(!emitters[name]) {
-    meta.emit('data', {name: name})
-    setTimeout(e => on(name, fn), 0)
-  }  
-  else emitters[name].once(name, fn)
-}
+  function once(name, fn){
+    if(!emitters[name]) {
+      meta.emit('data', {name: name})
+      setTimeout(e => on(name, fn), 0)
+    }
+    else emitters[name].once(name, fn)
+  }
 
-function emit(name, data){
-  if(!emitters[name]) {
-    meta.emit('data', {name: name})
-    setTimeout(e => emit(name, data, 0))
-  }  
-  else emitters[name].emit(name, data)
+  function emit(name, data){
+    if(!emitters[name]) {
+      meta.emit('data', {name: name})
+      setTimeout(e => emit(name, data, 0))
+    }
+    else emitters[name].emit('data', data)
+  }
 }

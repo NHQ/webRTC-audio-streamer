@@ -1,7 +1,7 @@
 module.exports = function(self){
   self.addEventListener('load', etc => {
     const WebAudioContext = window.AudioContext || window.webkitAudioContext
-    var master 
+    var master
     var Emitter = require('events')//.EventEmitter //require('./sharedEmitter')
     var bus = new Emitter()
     bus.once('iframeLoaded', e => {
@@ -23,12 +23,12 @@ module.exports = function(self){
     const Time = require('../since-when')
     var jmic = require('../jsynth-mic/stream')
     var sampler = require('../jsynth-file-sample')
-    var media 
+    var media
     var interval = 20
     var mime = 'audio/ogg;codecs=opus'
     var runp =require('run-waterfall')
     var {OggOpusDecoder} = require('ogg-opus-decoder')
-    var OpusMediaRecorder = require('opus-media-recorder') 
+    var OpusMediaRecorder = require('opus-media-recorder')
     window.MediaRecorder = OpusMediaRecorder;
 
     broadcasting = !self.parent.location.hash.length
@@ -45,7 +45,7 @@ module.exports = function(self){
             audio[msg.data.id].gain.value = Math.max(0, msg.data.data)
           break;
           case 'start':
-            
+
           break;
           case 'resume':
             audio.master.resume()
@@ -82,16 +82,16 @@ module.exports = function(self){
             //console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
           //app._log(new shajs('sha256').update(ab).digest('hex'))
           console.log(msg)
-          audio.calldecoder.decode(msg.data.data) 
+          audio.calldecoder.decode(msg.data.data)
 
-          //cb(null, audio) 
+          //cb(null, audio)
           break;
           case 'sourceBuffer':
             //console.log(new shajs('sha256').update(msg.data.data).digest('hex'),msg.data.data.length)
           //app._log(new shajs('sha256').update(ab).digest('hex'))
-          audio.sourcedecoder.decode(msg.data.data) 
+          audio.sourcedecoder.decode(msg.data.data)
 
-          //cb(null, audio) 
+          //cb(null, audio)
           break;
           case 'addAudioTrack':
             audio.addAudioTrack(msg.data.id,  msg.data.data)
@@ -101,18 +101,18 @@ module.exports = function(self){
             let cmd = data.msg.data
             audio[cmd](track)
           break;
-          
+
         }
       })
     })} catch(err){
       self.parent.postMessage({type: 'debug', data: err.toString()})
-    
+
     }
 
       function getApp(broadcasting, cb){
 
     class App extends require('events').EventEmitter {
-    
+
       constructor(master, broadcasting=true){
         super()
         this.broadcasting = broadcasting
@@ -137,14 +137,14 @@ module.exports = function(self){
 
         this.mic.connect(this.callmixer)
         this.track.connect(this.callmixer)
-        
+
         this.createDecoder(this.call, ({decoder}) => {
           this.calldecoder = decoder
          })
         this.createDecoder(this.source, ({decoder}) => {
           this.sourcedecoder = decoder
          })
-        
+
         if(broadcasting){
           this.mic.connect(this.mixer)
           this.call.connect(this.mixer)
@@ -172,7 +172,7 @@ module.exports = function(self){
       }
 
       play(id){
-        
+
       }
 
       captureMic (cb, connect) {
@@ -182,21 +182,21 @@ module.exports = function(self){
 
           if(err) console.log(err)
 
-          const mic = self.master.createMediaStreamSource(stream) 
+          const mic = self.master.createMediaStreamSource(stream)
           mic.connect(self.mic)
 
           self.mediastream = stream
           self.micnode = mic
-      
+
           cb(err, stream)
-          
-        
+
+
         })
       }
 
 
       createDecoder(connect, cb){
-      
+
         async function wsm(self, connect, cb){
 
           const decoder = new OggOpusDecoder({onDecode, onDecodeAll})
@@ -221,7 +221,7 @@ module.exports = function(self){
           }
 
           if(cb) cb({decoder, pid})
-          
+
         }
 
         wsm(this, connect, cb)
@@ -248,7 +248,7 @@ module.exports = function(self){
             //console.log(buf, id)
             if(buf.length) {
               window.parent.postMessage({
-                type: 'audioSourceBuffer', 
+                type: 'audioSourceBuffer',
                 data: buf,
                 id
               })
@@ -261,19 +261,19 @@ module.exports = function(self){
         return {encoder, node}
       }
     }
-
-  var audio = new App(new WebAudioContext({sampleRate: 48000}), broadcasting)
+  //let webAudioConstraints = {sampleRate: 48000}
+  var audio = new App(new WebAudioContext(), broadcasting)
 
   cb(null, audio)
   }
 
-  
+
 
 
     function tob(buf, type="application/wasm"){
       return URL.createObjectURL(new Blob([new Buffer(buf).buffer], {type}))
     }
-     
+
 
     function addMedia(cb, audio=true, video=false){
       var gam = require('getusermedia')
@@ -284,6 +284,6 @@ module.exports = function(self){
 
         cb(err, stream)
       })
-     }    
+     }
      })
 }
